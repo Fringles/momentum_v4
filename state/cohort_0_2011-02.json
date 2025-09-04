@@ -1,0 +1,67 @@
+{
+  "month_end": "2011-02-28",
+  "trade_date": "2011-03-01",
+  "cohort_id": 0,
+  "weights_ls": {
+    "ABEV3": 0.05,
+    "CNFB4": 0.05,
+    "EGIE3": 0.05,
+    "EZTC3": 0.05,
+    "GETI3": 0.05,
+    "ODPV3": 0.05,
+    "POMO4": 0.05,
+    "RPMG3": 0.05,
+    "TOTS3": 0.05,
+    "LPSB3": 0.05,
+    "AMER3": -0.0625,
+    "BPAN4": -0.0625,
+    "ELET3": -0.0625,
+    "LAND3": -0.0625,
+    "MAGG3": -0.0625,
+    "MILK33": -0.0625,
+    "PETR4": -0.0625,
+    "UNIP6": -0.0625
+  },
+  "weights_d10": {
+    "ABEV3": 0.1,
+    "CNFB4": 0.1,
+    "EGIE3": 0.1,
+    "EZTC3": 0.1,
+    "GETI3": 0.1,
+    "LPSB3": 0.1,
+    "ODPV3": 0.1,
+    "POMO4": 0.1,
+    "RPMG3": 0.1,
+    "TOTS3": 0.1
+  },
+  "dur_long": {
+    "CNFB4": 2,
+    "TOTS3": 2,
+    "ABEV3": 2,
+    "ODPV3": 2,
+    "EZTC3": 2,
+    "EGIE3": 2,
+    "GETI3": 2,
+    "RPMG3": 2,
+    "LPSB3": 2,
+    "POMO4": 2
+  },
+  "dur_short": {
+    "MAGG3": 2,
+    "BPAN4": 2,
+    "AMER3": 2,
+    "ELET3": 2,
+    "MILK33": 2,
+    "PETR4": 2,
+    "UNIP6": 2,
+    "LAND3": 2
+  },
+  "strikes_long": {
+    "LPSB3": 1
+  },
+  "strikes_short": {},
+  "ls_target_counts": {
+    "long": 0,
+    "short": 0
+  }
+}

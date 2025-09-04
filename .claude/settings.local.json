@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Read(G:\\/**)",
+      "Bash(dir:*)",
+      "Read(G:\\/**)",
+      "Read(G:\\/**)",
+      "Read(G:\\/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
