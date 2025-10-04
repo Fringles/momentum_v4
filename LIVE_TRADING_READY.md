@@ -46,10 +46,34 @@ Your Brazil momentum strategy has been successfully prepared for live trading wi
 
 ### Monthly Strategy Execution
 ```bash
-python3 scripts/momentum_br.py --cohorts 3 --beta-overlay \
+# Vol-targeted live run (recommended):
+python3 scripts/momentum_br.py \
+  --cohorts 3 --beta-overlay --apply-vol-target \
   --live-capital 10000000 --write-state-snapshots \
   --db-path "/path/to/financial_data.db" \
   --cdi-path "/path/to/cdi_series.xlsx"
+
+# Optional VT tuning
+#   --vol-target-ann 0.10         # Target annualized vol (default 0.10)
+#   --vol-window-months 36        # Rolling window (default 36)
+#   --vol-min-months 12           # Min history for VT (default 12)
+```
+
+### Cold-Start (New Account Bootstrap)
+```bash
+# Generates account-level cold-start targets and live orders
+python3 scripts/momentum_br.py \
+  --cohorts 3 --beta-overlay --apply-vol-target \
+  --cold-start --ramp-frac 0.33 \
+  --live-capital 10000000 --write-state-snapshots \
+  --db-path "/path/to/financial_data.db" \
+  --cdi-path "/path/to/cdi_series.xlsx"
+
+# Notes
+# - Cold-start exports:
+#   - results/account_targets_coldstart_YYYY-MM.csv (prev=0; delta=ramp_frac*target)
+#   - results/orders_live_coldstart_YYYY-MM.csv (netted, one order per symbol/book)
+# - Default ramp = 1/cohorts if --ramp-frac not provided
 ```
 
 ### Pre-Trade Validation

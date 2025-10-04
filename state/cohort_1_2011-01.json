@@ -37,28 +37,28 @@
     "TOTS3": 0.1
   },
   "dur_long": {
-    "CNFB4": 1,
-    "TOTS3": 1,
-    "ABEV3": 1,
-    "ODPV3": 1,
-    "EZTC3": 1,
-    "EGIE3": 1,
-    "GETI3": 1,
+    "POMO4": 1,
     "RPMG3": 1,
+    "EZTC3": 1,
+    "ODPV3": 1,
+    "ABEV3": 1,
     "LPSB3": 1,
-    "POMO4": 1
+    "EGIE3": 1,
+    "TOTS3": 1,
+    "GETI3": 1,
+    "CNFB4": 1
   },
   "dur_short": {
-    "MAGG3": 1,
-    "BPAN4": 1,
-    "AMER3": 1,
+    "GPIV33": 1,
     "ELET3": 1,
     "MILK33": 1,
-    "GPIV33": 1,
-    "PETR4": 1,
+    "MAGG3": 1,
+    "VIVR3": 1,
     "UNIP6": 1,
+    "BPAN4": 1,
+    "PETR4": 1,
     "LAND3": 1,
-    "VIVR3": 1
+    "AMER3": 1
   },
   "strikes_long": {},
   "strikes_short": {},

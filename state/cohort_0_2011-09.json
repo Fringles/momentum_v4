@@ -44,31 +44,31 @@
     "VALE3": 0.07142857142857142
   },
   "dur_long": {
-    "CTIP3": 6,
-    "ABEV3": 9,
-    "ODPV3": 9,
-    "MILS3": 6,
-    "EZTC3": 9,
+    "POMO4": 9,
     "CSAN3": 3,
     "ENEV3": 6,
-    "LPSB3": 9,
-    "POMO4": 9,
+    "ODPV3": 9,
+    "EZTC3": 9,
+    "ABEV3": 9,
+    "MILS3": 6,
     "AMAR3": 3,
+    "LPSB3": 9,
     "VALE3": 6,
-    "TCSA3": 3
+    "TCSA3": 3,
+    "CTIP3": 6
   },
   "dur_short": {
     "OSXB3": 6,
-    "SANB11": 3,
-    "GFSA3": 3,
-    "AMER3": 9,
+    "GOLL54": 6,
     "ELET3": 9,
-    "CYRE3": 6,
     "HYPE3": 6,
+    "LAND3": 9,
     "MILK33": 9,
     "PRML3": 6,
-    "LAND3": 9,
-    "GOLL54": 6
+    "SANB11": 3,
+    "GFSA3": 3,
+    "CYRE3": 6,
+    "AMER3": 9
   },
   "strikes_long": {
     "LPSB3": 1,

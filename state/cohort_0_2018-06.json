@@ -46,32 +46,32 @@
     "YDUQ3": 0.06666666666666667
   },
   "dur_long": {
-    "RAPT4": 3,
-    "PSSA3": 6,
-    "ANIM3": 6,
+    "ENGI11": 7,
+    "VULC3": 6,
     "ELET3": 3,
     "RENT3": 6,
-    "PRIO3": 6,
-    "VULC3": 6,
-    "ENGI11": 7,
-    "MGLU3": 21,
+    "RAPT4": 3,
+    "USIM5": 3,
     "YDUQ3": 6,
+    "PRIO3": 6,
+    "MGLU3": 21,
+    "PSSA3": 6,
     "BRAP4": 3,
-    "USIM5": 3
+    "ANIM3": 6
   },
   "dur_short": {
-    "HGTX3": 3,
-    "LIGT3": 3,
-    "NEXP3": 3,
-    "CSNA3": 18,
     "UGPA3": 3,
     "CIEL3": 15,
-    "WIZC3": 6,
+    "HGTX3": 3,
     "LEVE3": 3,
-    "BRFS3": 3,
-    "AMAR3": 3,
+    "CSNA3": 18,
     "MOTV3": 6,
-    "LAME3": 6
+    "AMAR3": 3,
+    "BRFS3": 3,
+    "WIZC3": 6,
+    "LAME3": 6,
+    "LIGT3": 3,
+    "NEXP3": 3
   },
   "strikes_long": {
     "LPSB3": 1,

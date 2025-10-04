@@ -45,33 +45,33 @@
     "WIZC3": 0.07692307692307693
   },
   "dur_long": {
-    "LIGT3": 5,
-    "ENAT3": 2,
-    "BEEF3": 2,
-    "FESA4": 2,
+    "BRSR6": 14,
+    "SEER3": 5,
     "QUAL3": 2,
     "EZTC3": 2,
-    "BRSR6": 14,
-    "TGMA3": 2,
-    "WIZC3": 4,
     "MGLU3": 14,
-    "BRAP4": 11,
+    "BEEF3": 2,
     "FLRY3": 11,
-    "SEER3": 5
+    "BRAP4": 11,
+    "FESA4": 2,
+    "TGMA3": 2,
+    "ENAT3": 2,
+    "WIZC3": 4,
+    "LIGT3": 5
   },
   "dur_short": {
+    "STBP3": 2,
+    "ELET3": 2,
+    "JBSS3": 2,
+    "LEVE3": 2,
     "HGTX3": 2,
+    "LINX3": 2,
     "CSNA3": 5,
-    "GFSA3": 11,
     "BBSE3": 8,
     "VLID3": 14,
-    "ELET3": 2,
-    "LINX3": 2,
     "CPLE6": 2,
-    "LEVE3": 2,
-    "STBP3": 2,
     "BRFS3": 5,
-    "JBSS3": 2
+    "GFSA3": 11
   },
   "strikes_long": {
     "LPSB3": 1,

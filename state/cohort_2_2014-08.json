@@ -25,7 +25,7 @@
     "RSID3": -0.05,
     "TOTS3": -0.05,
     "AMAR3": -0.05,
-    "MRFG3": -0.05
+    "MBRF3": -0.05
   },
   "weights_d10": {
     "AMER3": 0.06666666666666667,
@@ -45,31 +45,31 @@
     "YDUQ3": 0.06666666666666667
   },
   "dur_long": {
-    "EMBR3": 6,
+    "GUAR3": 3,
+    "ELET3": 3,
+    "GOLL54": 3,
+    "COGN3": 11,
     "VALE3": 12,
     "CSNA3": 6,
-    "GFSA3": 3,
-    "BBSE3": 3,
-    "AMER3": 6,
     "YDUQ3": 21,
-    "ELET3": 3,
-    "SMLS3": 3,
-    "COGN3": 11,
     "PSSA3": 15,
-    "GUAR3": 3,
-    "GOLL54": 3
+    "BBSE3": 3,
+    "EMBR3": 6,
+    "GFSA3": 3,
+    "SMLS3": 3,
+    "AMER3": 6
   },
   "dur_short": {
-    "TOTS3": 6,
-    "NEXP3": 3,
-    "RSID3": 21,
-    "MRFG3": 18,
     "BRSR6": 6,
+    "POMO4": 3,
     "MMXM3": 9,
     "PRIO3": 3,
+    "RSID3": 21,
+    "AMAR3": 9,
     "LPSB3": 3,
-    "POMO4": 3,
-    "AMAR3": 9
+    "TOTS3": 6,
+    "MBRF3": 18,
+    "NEXP3": 3
   },
   "strikes_long": {
     "LPSB3": 1,

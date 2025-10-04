@@ -52,6 +52,8 @@ def main():
     p.add_argument("--cost-bps", nargs="*", type=int, default=[20, 50, 100])
     p.add_argument("--target-vol", type=float, default=0.10)
     p.add_argument("--vt-bps", type=int, default=50, help="Cost level to vol-target")
+    p.add_argument("--rolling-window", type=int, default=12, help="Rolling window (months) for Sharpe/vol")
+    p.add_argument("--excess-vs-cdi", action="store_true", help="Compute rolling Sharpe vs CDI excess")
     args = p.parse_args()
 
     import matplotlib.pyplot as plt
@@ -175,8 +177,58 @@ def main():
     fig.savefig(os.path.join(args.out_dir, "plot_cum_excess_vs_cdi_bm.png"), dpi=150)
     plt.close(fig)
 
+    # 7) Rolling 12m Sharpe (annualized). Optionally vs CDI excess
+    def rolling_sharpe(r: pd.Series, rf, window: int) -> pd.Series:
+        x = r.astype(float).copy()
+        if rf is not None:
+            x = x.align(rf.astype(float), join="left")[0] - rf
+        mu = x.rolling(window=window, min_periods=max(3, window // 3)).mean()
+        sd = x.rolling(window=window, min_periods=max(3, window // 3)).std()
+        out = np.where(sd.values > 0, (mu / sd * np.sqrt(12)).values, np.nan)
+        return pd.Series(out, index=x.index)
+
+    rf_series = ts["CDI"] if args.excess_vs_cdi and "CDI" in ts.columns else None
+    sharpe_ls_net = rolling_sharpe(net_series[f"LS_net_{args.vt_bps}"], rf_series, args.rolling_window)
+    sharpe_ls_vt = rolling_sharpe(ls_net_vt, rf_series, args.rolling_window)
+    fig, ax = plt.subplots(figsize=(10, 4))
+    ax.plot(sharpe_ls_net.index, sharpe_ls_net.values, label=f"LS net {args.vt_bps}bps")
+    ax.plot(sharpe_ls_vt.index, sharpe_ls_vt.values, label=f"LS net {args.vt_bps}bps, VT 10%", alpha=0.8)
+    ax.axhline(0, color='k', lw=1, alpha=0.6)
+    ax.set_title(f"Rolling {args.rolling_window}m Sharpe" + (" (excess vs CDI)" if rf_series is not None else ""))
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    fig.savefig(os.path.join(args.out_dir, "plot_rolling_sharpe.png"), dpi=150)
+    plt.close(fig)
+
+    # 8) Rolling 12m volatility (annualized)
+    def rolling_vol_ann(r: pd.Series, window: int) -> pd.Series:
+        return r.astype(float).rolling(window=window, min_periods=max(3, window // 3)).std() * np.sqrt(12)
+
+    vol_ls_net = rolling_vol_ann(net_series[f"LS_net_{args.vt_bps}"], args.rolling_window)
+    vol_ls_vt = rolling_vol_ann(ls_net_vt, args.rolling_window)
+    fig, ax = plt.subplots(figsize=(10, 4))
+    ax.plot(vol_ls_net.index, vol_ls_net.values, label=f"LS net {args.vt_bps}bps")
+    ax.plot(vol_ls_vt.index, vol_ls_vt.values, label=f"LS net {args.vt_bps}bps, VT 10%", alpha=0.8)
+    ax.set_title(f"Rolling {args.rolling_window}m Volatility (annualized)")
+    ax.yaxis.set_major_formatter(lambda x, pos: f"{x:.0%}")
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    fig.savefig(os.path.join(args.out_dir, "plot_rolling_vol.png"), dpi=150)
+    plt.close(fig)
+
     print("Saved plots:")
-    for f in ["plot_cum_returns.png", "plot_drawdowns.png", "plot_rolling_alpha.png", "plot_turnover_ls.png", "plot_cum_vs_benchmarks.png", "plot_cum_excess_vs_cdi_bm.png"]:
+    for f in [
+        "plot_cum_returns.png",
+        "plot_drawdowns.png",
+        "plot_rolling_alpha.png",
+        "plot_turnover_ls.png",
+        "plot_cum_vs_benchmarks.png",
+        "plot_cum_excess_vs_cdi_bm.png",
+        "plot_rolling_sharpe.png",
+        "plot_rolling_vol.png",
+    ]:
         print(os.path.join(args.out_dir, f))
 
 

@@ -47,32 +47,32 @@
     "SANB11": 0.0625
   },
   "dur_long": {
-    "SANB11": 3,
-    "RSID3": 3,
-    "CSUD3": 3,
     "BRSR6": 9,
     "MDIA3": 9,
     "ELET3": 9,
+    "GOLL54": 6,
     "PETR4": 6,
-    "CSMG3": 12,
     "LINX3": 15,
-    "FLRY3": 6,
+    "SANB11": 3,
+    "CSUD3": 3,
     "MGLU3": 9,
+    "RSID3": 3,
+    "FLRY3": 6,
     "BRAP4": 6,
     "HBOR3": 3,
-    "GOLL54": 6
+    "CSMG3": 12
   },
   "dur_short": {
-    "BRPR3": 9,
-    "EMBR3": 9,
     "PDGR3": 3,
-    "VLID3": 9,
-    "BBSE3": 3,
     "UGPA3": 3,
-    "GFSA3": 6,
     "PSSA3": 12,
+    "MOTV3": 3,
+    "BBSE3": 3,
+    "VLID3": 9,
+    "BRPR3": 9,
     "TUPY3": 3,
-    "MOTV3": 3
+    "EMBR3": 9,
+    "GFSA3": 6
   },
   "strikes_long": {
     "LPSB3": 1,

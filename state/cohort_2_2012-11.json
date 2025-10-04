@@ -44,30 +44,30 @@
     "VLID3": 0.06666666666666667
   },
   "dur_long": {
+    "B3SA3": 3,
     "MPLU3": 6,
-    "BEEF3": 3,
-    "RADL3": 6,
-    "TAEE11": 3,
+    "LEVE3": 3,
     "EZTC3": 23,
     "UGPA3": 3,
-    "VLID3": 6,
     "CIEL3": 6,
     "AZZA3": 3,
     "SBSP3": 6,
-    "LEVE3": 3,
-    "B3SA3": 3,
+    "BEEF3": 3,
+    "TAEE11": 3,
+    "VLID3": 6,
+    "RADL3": 6,
     "HBOR3": 6
   },
   "dur_short": {
-    "DASA3": 6,
     "OSXB3": 21,
-    "AMER3": 23,
     "ELET3": 23,
-    "PRIO3": 9,
+    "GOLL54": 21,
+    "DASA3": 6,
     "PRML3": 6,
-    "LAND3": 23,
+    "PRIO3": 9,
     "BRFS3": 3,
-    "GOLL54": 21
+    "LAND3": 23,
+    "AMER3": 23
   },
   "strikes_long": {
     "LPSB3": 1,

@@ -28,7 +28,7 @@
     "PRIO3": -0.041666666666666664,
     "PRML3": -0.041666666666666664,
     "AEDU3": -0.041666666666666664,
-    "MRFG3": -0.041666666666666664
+    "MBRF3": -0.041666666666666664
   },
   "weights_d10": {
     "CIEL3": 0.0625,
@@ -49,34 +49,34 @@
     "VSTE3": 0.0625
   },
   "dur_long": {
-    "CTIP3": 5,
-    "MPLU3": 3,
+    "MYPK3": 6,
     "TIMS3": 9,
     "VSTE3": 6,
-    "RADL3": 3,
-    "EZTC3": 20,
-    "VLID3": 3,
-    "MYPK3": 6,
+    "MPLU3": 3,
+    "CRUZ3": 9,
     "CIEL3": 3,
-    "CSMG3": 9,
+    "EZTC3": 20,
+    "RADL3": 3,
     "SBSP3": 3,
-    "CMIG4": 4,
+    "VLID3": 3,
     "HBOR3": 3,
-    "CRUZ3": 9
+    "CSMG3": 9,
+    "CMIG4": 4,
+    "CTIP3": 5
   },
   "dur_short": {
-    "DASA3": 3,
-    "LIGT3": 3,
     "OSXB3": 18,
-    "MRFG3": 3,
-    "GFSA3": 18,
-    "AMER3": 20,
     "ELET3": 20,
+    "GOLL54": 18,
+    "LIGT3": 3,
+    "DASA3": 3,
+    "PRML3": 3,
     "PRIO3": 6,
     "AEDU3": 6,
-    "PRML3": 3,
+    "GFSA3": 18,
+    "MBRF3": 3,
     "LAND3": 20,
-    "GOLL54": 18
+    "AMER3": 20
   },
   "strikes_long": {
     "LPSB3": 1,

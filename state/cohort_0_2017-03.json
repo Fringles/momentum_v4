@@ -42,30 +42,30 @@
     "SEER3": 0.07692307692307693
   },
   "dur_long": {
-    "RAPT4": 3,
     "BRSR6": 6,
     "MDIA3": 9,
+    "SEER3": 3,
     "ELET3": 9,
-    "PETR4": 3,
-    "CSMG3": 9,
-    "DIRR3": 6,
-    "MGLU3": 6,
-    "BRAP4": 3,
-    "FLRY3": 6,
     "GOLL54": 6,
-    "SEER3": 3
+    "PETR4": 3,
+    "DIRR3": 6,
+    "RAPT4": 3,
+    "MGLU3": 6,
+    "FLRY3": 6,
+    "BRAP4": 3,
+    "CSMG3": 9
   },
   "dur_short": {
-    "BRPR3": 6,
-    "EMBR3": 6,
-    "TOTS3": 6,
     "PDGR3": 3,
     "CSNA3": 3,
-    "VLID3": 9,
-    "GRND3": 9,
     "PSSA3": 9,
+    "MOTV3": 3,
+    "GRND3": 9,
+    "BRPR3": 6,
     "TUPY3": 9,
-    "MOTV3": 3
+    "VLID3": 9,
+    "TOTS3": 6,
+    "EMBR3": 6
   },
   "strikes_long": {
     "LPSB3": 1,

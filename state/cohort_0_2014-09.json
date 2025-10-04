@@ -41,28 +41,28 @@
     "YDUQ3": 0.07142857142857142
   },
   "dur_long": {
-    "EMBR3": 9,
-    "SMTO3": 3,
-    "VALE3": 12,
-    "YDUQ3": 21,
-    "GFSA3": 3,
-    "BBSE3": 6,
-    "AMER3": 6,
-    "SMLS3": 6,
-    "COGN3": 12,
     "GUAR3": 4,
+    "GOLL54": 6,
+    "COGN3": 12,
+    "VALE3": 12,
     "JBSS3": 3,
-    "GOLL54": 6
+    "YDUQ3": 21,
+    "SMTO3": 3,
+    "BBSE3": 6,
+    "EMBR3": 9,
+    "GFSA3": 3,
+    "SMLS3": 6,
+    "AMER3": 6
   },
   "dur_short": {
-    "TOTS3": 6,
-    "NEXP3": 3,
-    "RSID3": 21,
-    "RAPT4": 6,
     "BRSR6": 3,
-    "PRIO3": 3,
     "POMO4": 9,
-    "CZLT33": 3
+    "CZLT33": 3,
+    "RAPT4": 6,
+    "RSID3": 21,
+    "PRIO3": 3,
+    "TOTS3": 6,
+    "NEXP3": 3
   },
   "strikes_long": {
     "LPSB3": 1,

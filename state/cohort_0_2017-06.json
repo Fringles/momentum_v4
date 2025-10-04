@@ -40,28 +40,28 @@
     "RAPT4": 0.07692307692307693
   },
   "dur_long": {
-    "LIGT3": 3,
-    "RAPT4": 6,
     "BRSR6": 9,
     "MDIA3": 12,
-    "PETR4": 6,
+    "GOLL54": 9,
     "ELET3": 12,
+    "RAPT4": 6,
     "MGLU3": 9,
     "BRAP4": 6,
     "HBOR3": 3,
-    "GOLL54": 9
+    "PETR4": 6,
+    "LIGT3": 3
   },
   "dur_short": {
-    "EMBR3": 9,
     "PDGR3": 6,
-    "CSNA3": 6,
-    "VLID3": 12,
-    "BBSE3": 3,
-    "EGIE3": 3,
-    "UGPA3": 3,
     "CIEL3": 3,
+    "UGPA3": 3,
+    "CSNA3": 6,
     "PSSA3": 12,
-    "MOTV3": 6
+    "MOTV3": 6,
+    "BBSE3": 3,
+    "VLID3": 12,
+    "EGIE3": 3,
+    "EMBR3": 9
   },
   "strikes_long": {
     "LPSB3": 1,

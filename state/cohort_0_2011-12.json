@@ -45,32 +45,32 @@
     "VSTE3": 0.07142857142857142
   },
   "dur_long": {
-    "CTIP3": 9,
-    "CNFB4": 3,
+    "POMO4": 12,
     "TIMS3": 3,
+    "ENEV3": 9,
     "VSTE3": 3,
-    "LIGT3": 3,
+    "TCSA3": 6,
+    "RPMG3": 3,
     "ODPV3": 12,
     "EZTC3": 12,
-    "RPMG3": 3,
-    "ENEV3": 9,
     "SBSP3": 3,
-    "POMO4": 12,
     "VALE3": 9,
-    "TCSA3": 6
+    "CNFB4": 3,
+    "CTIP3": 9,
+    "LIGT3": 3
   },
   "dur_short": {
     "OSXB3": 9,
-    "TOTS3": 3,
-    "SANB11": 6,
-    "GFSA3": 6,
-    "AMER3": 12,
-    "HYPE3": 9,
-    "ELET3": 12,
-    "MILK33": 12,
     "OGXP3": 3,
+    "GOLL54": 9,
+    "ELET3": 12,
+    "HYPE3": 9,
+    "MILK33": 12,
+    "SANB11": 6,
+    "TOTS3": 3,
+    "GFSA3": 6,
     "LAND3": 12,
-    "GOLL54": 9
+    "AMER3": 12
   },
   "strikes_long": {
     "LPSB3": 1,

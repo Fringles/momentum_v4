@@ -22,7 +22,7 @@
     "MILS3": -0.05,
     "SEER3": -0.05,
     "BBAS3": -0.05,
-    "MRFG3": -0.05,
+    "MBRF3": -0.05,
     "PETR4": -0.05
   },
   "weights_d10": {
@@ -40,29 +40,29 @@
     "UGPA3": 0.08333333333333333
   },
   "dur_long": {
-    "EMBR3": 21,
-    "RADL3": 9,
-    "PSSA3": 3,
+    "JBSS3": 6,
+    "CIEL3": 6,
     "UGPA3": 6,
     "GRND3": 9,
-    "CIEL3": 6,
-    "SMLS3": 18,
+    "PSSA3": 3,
     "EQTL3": 6,
-    "CVCB3": 3,
+    "RADL3": 9,
+    "EMBR3": 21,
+    "SMLS3": 18,
     "MRVE3": 9,
-    "JBSS3": 6
+    "CVCB3": 3
   },
   "dur_short": {
-    "LIGT3": 6,
-    "MGLU3": 3,
-    "MRFG3": 3,
-    "MILS3": 12,
+    "SEER3": 6,
+    "BBAS3": 3,
     "GOAU4": 3,
     "PETR4": 6,
+    "MILS3": 12,
+    "MGLU3": 3,
     "CSMG3": 3,
+    "MBRF3": 3,
     "CMIG4": 3,
-    "BBAS3": 3,
-    "SEER3": 6
+    "LIGT3": 6
   },
   "strikes_long": {
     "LPSB3": 1,

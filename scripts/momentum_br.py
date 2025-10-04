@@ -43,6 +43,11 @@ class Config:
     ls_turnover_budget: float = 0.30
     use_turnover_budget: bool = True
     micro_add_frac: float = 0.02
+    # Vol targeting
+    apply_vol_target: bool = False
+    vol_target_ann: float = 0.10
+    vol_window_months: int = 36
+    vol_min_months: int = 12
     live_capital: Optional[float] = None
     lot_size: int = 1
     write_state_snapshots: bool = False
@@ -1113,6 +1118,48 @@ def run_analysis(cfg: Config) -> None:
                     os.makedirs(out_dir, exist_ok=True)
                     period_label = pd.Period(d_mend, freq='M').strftime('%Y-%m')
                     df_targets = pd.DataFrame(target_rows)
+                    # Apply vol-target scale to LS weights for live executables (orders/targets)
+                    # Only when vol targeting is enabled via CLI/config
+                    # Estimate VT using rolling vol of historical LS composite returns up to t-1
+                    try:
+                        if getattr(cfg, 'apply_vol_target', False):
+                            from math import sqrt
+                            # Build historical LS returns from previously computed rows (exclude current period)
+                            ls_hist_all = [float(r.get("LS", np.nan)) for r in rows if (r.get("LS", None) is not None)]
+                            ls_hist_curr = ls_hist_all[:-1] if len(ls_hist_all) >= 1 else []
+                            ls_hist_prev = ls_hist_all[:-2] if len(ls_hist_all) >= 2 else []
+                            def _vt_from(hist_list: List[float]) -> float:
+                                if not hist_list:
+                                    return 1.0
+                                s = pd.Series(hist_list, dtype=float).dropna()
+                                if s.empty:
+                                    return 1.0
+                                win = int(getattr(cfg, 'vol_window_months', 36) or 36)
+                                minp = int(getattr(cfg, 'vol_min_months', 12) or 12)
+                                s_win = s.iloc[-win:] if len(s) > win else s
+                                if len(s_win) < max(2, minp):
+                                    return 1.0
+                                sigma_ann = float(s_win.std(ddof=1) * sqrt(12.0))
+                                if not np.isfinite(sigma_ann) or sigma_ann <= 0:
+                                    return 1.0
+                                vt = float(getattr(cfg, 'vol_target_ann', 0.10) or 0.10) / sigma_ann
+                                return vt if np.isfinite(vt) and vt > 0 else 1.0
+                            vt_curr = _vt_from(ls_hist_curr)
+                            vt_prev = _vt_from(ls_hist_prev)
+                            # Apply to LS rows only
+                            if 'book' in df_targets.columns:
+                                mask_ls = df_targets['book'] == 'LS'
+                                if mask_ls.any():
+                                    pw = df_targets.loc[mask_ls, 'prev_weight'].astype(float)
+                                    tw = df_targets.loc[mask_ls, 'target_weight'].astype(float)
+                                    df_targets.loc[mask_ls, 'prev_weight'] = pw * vt_prev
+                                    df_targets.loc[mask_ls, 'target_weight'] = tw * vt_curr
+                                    df_targets.loc[mask_ls, 'delta_weight'] = df_targets.loc[mask_ls, 'target_weight'] - df_targets.loc[mask_ls, 'prev_weight']
+                                    # Annotate for audit
+                                    df_targets.loc[mask_ls, 'vt_prev'] = vt_prev
+                                    df_targets.loc[mask_ls, 'vt_curr'] = vt_curr
+                    except Exception:
+                        pass
                     df_targets.sort_values(["book", "cohort_id", "side", "ticker"], inplace=True)
                     df_targets.to_csv(os.path.join(out_dir, f"targets_{period_label}.csv"), index=False)
                     # Optional orders export if live capital is provided
@@ -1519,6 +1566,23 @@ def run_analysis(cfg: Config) -> None:
         # Apply hedge contemporaneously: r'_t = r_LS + h_t * r_IBOV
         pf["LS"] = ls_raw + hedge_ratio * bm_m
 
+    # Vol targeting on hedged series (if requested). Uses rolling vol of hedged LS.
+    # We also compute and store an LS_vt comparison series even if not applied to LS.
+    ls_for_vt = pf["LS"].astype(float).copy() if "LS" in pf.columns else pd.Series(dtype=float)
+    if not ls_for_vt.empty:
+        # Rolling annualized realized vol of LS (months -> ann)
+        vt_win = max(6, int(getattr(cfg, 'vol_window_months', 36) or 36))
+        vt_min = max(6, int(getattr(cfg, 'vol_min_months', 12) or 12))
+        ls_roll_vol_ann = ls_for_vt.rolling(window=vt_win, min_periods=vt_min).std() * np.sqrt(12.0)
+        tgt = float(getattr(cfg, 'vol_target_ann', 0.10) or 0.10)
+        scale_vt = tgt / ls_roll_vol_ann
+        scale_vt = scale_vt.replace([np.inf, -np.inf], np.nan).fillna(1.0)
+        pf["vt_scale"] = scale_vt
+        pf["LS_vt"] = ls_for_vt * scale_vt
+        if getattr(cfg, 'apply_vol_target', False):
+            pf["LS_pre_vt"] = ls_for_vt
+            pf["LS"] = pf["LS_vt"].astype(float)
+
     # 7) Performance and inference
     print("Computing performance statistics ...")
     results = {}
@@ -1530,6 +1594,43 @@ def run_analysis(cfg: Config) -> None:
         mu, tstat = newey_west_tstat(r_ls, lags=cfg.nw_lags)
         capm = capm_alpha_ir(r_ls, pf["BOVA11"], lags=cfg.nw_lags)
         results["LS"] = {
+            "mean_monthly": mu,
+            "tstat_monthly": tstat,
+            "hit_rate": hit_rate,
+            "max_drawdown": mdd,
+            "capm_alpha": capm["alpha"],
+            "capm_alpha_t": capm["alpha_t"],
+            "capm_beta": capm["beta"],
+            "capm_ir_ann": capm["ir"],
+            "capm_te_ann": capm["te_ann"],
+        }
+
+    # LS_vt: comparison metrics for vol-targeted series (not net of costs here)
+    if "LS_vt" in pf.columns:
+        r_lsvt = pf["LS_vt"].astype(float)
+        hit_rate = float((r_lsvt > 0).mean())
+        mdd = max_drawdown(r_lsvt)
+        mu, tstat = newey_west_tstat(r_lsvt, lags=cfg.nw_lags)
+        capm = capm_alpha_ir(r_lsvt, pf["BOVA11"], lags=cfg.nw_lags)
+        results["LS_vt"] = {
+            "mean_monthly": mu,
+            "tstat_monthly": tstat,
+            "hit_rate": hit_rate,
+            "max_drawdown": mdd,
+            "capm_alpha": capm["alpha"],
+            "capm_alpha_t": capm["alpha_t"],
+            "capm_beta": capm["beta"],
+            "capm_ir_ann": capm["ir"],
+            "capm_te_ann": capm["te_ann"],
+        }
+    # LS_pre_vt: baseline hedged series when VT applied (for comparison)
+    if "LS_pre_vt" in pf.columns:
+        r_lspre = pf["LS_pre_vt"].astype(float)
+        hit_rate = float((r_lspre > 0).mean())
+        mdd = max_drawdown(r_lspre)
+        mu, tstat = newey_west_tstat(r_lspre, lags=cfg.nw_lags)
+        capm = capm_alpha_ir(r_lspre, pf["BOVA11"], lags=cfg.nw_lags)
+        results["LS_pre_vt"] = {
             "mean_monthly": mu,
             "tstat_monthly": tstat,
             "hit_rate": hit_rate,
@@ -1570,6 +1671,23 @@ def run_analysis(cfg: Config) -> None:
         "beta": alpha_stats.get("beta", np.nan),
         "ir_ann": alpha_stats.get("ir", np.nan),
     }
+    # Also report for LS_vt if present
+    if "LS_vt" in pf.columns:
+        alpha_stats_vt = capm_alpha_ir(pf["LS_vt"], pf["BOVA11"], lags=cfg.nw_lags)
+        results["LS_vt_alpha_vs_BOVA11"] = {
+            "alpha_bps_per_month": alpha_stats_vt.get("alpha", np.nan) * 1e4,
+            "alpha_tstat": alpha_stats_vt.get("alpha_t", np.nan),
+            "beta": alpha_stats_vt.get("beta", np.nan),
+            "ir_ann": alpha_stats_vt.get("ir", np.nan),
+        }
+    if "LS_pre_vt" in pf.columns:
+        alpha_stats_pre = capm_alpha_ir(pf["LS_pre_vt"], pf["BOVA11"], lags=cfg.nw_lags)
+        results["LS_pre_vt_alpha_vs_BOVA11"] = {
+            "alpha_bps_per_month": alpha_stats_pre.get("alpha", np.nan) * 1e4,
+            "alpha_tstat": alpha_stats_pre.get("alpha_t", np.nan),
+            "beta": alpha_stats_pre.get("beta", np.nan),
+            "ir_ann": alpha_stats_pre.get("ir", np.nan),
+        }
 
     # Stability by subperiods
     def subperiod_mask(start: str, end: str) -> pd.Series:
@@ -1688,6 +1806,24 @@ def run_analysis(cfg: Config) -> None:
         print(f"  Hit rate: {v['hit_rate']:.2%}")
         print(f"  Max DD: {v['max_drawdown']:.2%}")
 
+    # LS_vt block (comparison)
+    if "LS_vt" in results:
+        v = results["LS_vt"]
+        print("\nLS (Vol-Targeted):")
+        print(f"  Mean monthly (raw): {v['mean_monthly']:.5f} (t={v['tstat_monthly']:.2f})")
+        print(f"  CAPM alpha vs IBOV: {v['capm_alpha']*1e4:.2f} bps/mo (t={v['capm_alpha_t']:.2f}), Beta={v['capm_beta']:.3f}")
+        print(f"  Alpha IR (annualized): {v['capm_ir_ann']:.2f} (TE={v['capm_te_ann']:.2%} ann)")
+        print(f"  Hit rate: {v['hit_rate']:.2%}")
+        print(f"  Max DD: {v['max_drawdown']:.2%}")
+    if "LS_pre_vt" in results:
+        v = results["LS_pre_vt"]
+        print("\nLS (Baseline, Pre-VT):")
+        print(f"  Mean monthly (raw): {v['mean_monthly']:.5f} (t={v['tstat_monthly']:.2f})")
+        print(f"  CAPM alpha vs IBOV: {v['capm_alpha']*1e4:.2f} bps/mo (t={v['capm_alpha_t']:.2f}), Beta={v['capm_beta']:.3f}")
+        print(f"  Alpha IR (annualized): {v['capm_ir_ann']:.2f} (TE={v['capm_te_ann']:.2%} ann)")
+        print(f"  Hit rate: {v['hit_rate']:.2%}")
+        print(f"  Max DD: {v['max_drawdown']:.2%}")
+
     # D10/D1 blocks (keep CDI-excess context for reference)
     for k in ["D10", "D1"]:
         if k not in results:
@@ -1704,6 +1840,22 @@ def run_analysis(cfg: Config) -> None:
     if a:
         print("\nPrimary Yardstick — CAPM alpha vs IBOV (HAC lags={}):".format(cfg.nw_lags))
         print(f"  Alpha: {a['alpha_bps_per_month']:.2f} bps/month (t={a['alpha_tstat']:.2f}), Beta={a['beta']:.3f}, IR(ann)={a.get('ir_ann', float('nan')):.2f}")
+    av = results.get("LS_vt_alpha_vs_BOVA11", {})
+    if av:
+        print("  LS (Vol-Targeted) Alpha: {} bps/month (t={:.2f}), Beta={:.3f}, IR(ann)={:.2f}".format(
+            av.get('alpha_bps_per_month', float('nan')),
+            av.get('alpha_tstat', float('nan')),
+            av.get('beta', float('nan')),
+            av.get('ir_ann', float('nan')),
+        ))
+    ap = results.get("LS_pre_vt_alpha_vs_BOVA11", {})
+    if ap:
+        print("  LS (Baseline) Alpha: {} bps/month (t={:.2f}), Beta={:.3f}, IR(ann)={:.2f}".format(
+            ap.get('alpha_bps_per_month', float('nan')),
+            ap.get('alpha_tstat', float('nan')),
+            ap.get('beta', float('nan')),
+            ap.get('ir_ann', float('nan')),
+        ))
 
     print("\n=== Stability by subperiods ===")
     for name, v in stability.items():
@@ -1781,6 +1933,20 @@ def make_parser() -> argparse.ArgumentParser:
                    help="Shrinkage toward 0 for beta estimate (0..1), e.g., 0.5")
     p.add_argument("--overlay-band", type=float, default=0.10,
                    help="Do not update hedge if |beta_hat| <= band; carry previous hedge")
+    # Vol targeting options
+    try:
+        from argparse import BooleanOptionalAction  # py39+
+        p.add_argument("--apply-vol-target", action=BooleanOptionalAction, default=False,
+                       help="Apply 10% annualized vol targeting to hedged LS using rolling window")
+    except Exception:
+        p.add_argument("--apply-vol-target", action="store_true", default=False,
+                       help="Apply 10% annualized vol targeting to hedged LS using rolling window")
+    p.add_argument("--vol-target-ann", type=float, default=0.10,
+                   help="Annualized volatility target (e.g., 0.10 for 10%)")
+    p.add_argument("--vol-window-months", type=int, default=36,
+                   help="Rolling window in months for realized vol estimate (e.g., 36)")
+    p.add_argument("--vol-min-months", type=int, default=12,
+                   help="Minimum months required for realized vol estimate (default 12)")
     p.add_argument("--band-keep", type=float, default=0.80,
                    help="Keep band percentile threshold (e.g., 0.80)")
     p.add_argument("--band-add", type=float, default=0.90,
@@ -1844,6 +2010,10 @@ if __name__ == "__main__":
         overlay_halflife_days=args.overlay_halflife_days,
         overlay_shrink=args.overlay_shrink,
         overlay_band=args.overlay_band,
+        apply_vol_target=getattr(args, "apply_vol_target", False),
+        vol_target_ann=getattr(args, "vol_target_ann", 0.10),
+        vol_window_months=getattr(args, "vol_window_months", 36),
+        vol_min_months=getattr(args, "vol_min_months", 12),
         band_keep=args.band_keep,
         band_add=args.band_add,
         sector_tol=args.sector_tol,
