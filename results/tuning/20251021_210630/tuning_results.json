@@ -1,0 +1,1570 @@
+{
+  "results": [
+    {
+      "run_id": "run_01",
+      "params": {
+        "band_keep": 0.7969673244364766,
+        "band_add": 0.920288976834141,
+        "sector_tol": 0.08496227224398621,
+        "exit_cap_frac": 0.060193999259044395,
+        "ls_turnover_budget": 0.34729884547695816,
+        "micro_add_frac": 0.011660395944798651,
+        "overlay_band": 0.0921723277245407
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.010623783525114946,
+          "t_stat": 3.501889418330381,
+          "cagr": 0.1294131877894975,
+          "ann_vol": 0.1024304806130886,
+          "sharpe": 1.2446041601906652,
+          "max_drawdown": -0.15664403444532893,
+          "hit_rate": 0.6421052631578947
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.009719430847267944,
+          "t_stat": 3.196599440464536,
+          "cagr": 0.11730952183232524,
+          "ann_vol": 0.10266089372085285,
+          "sharpe": 1.1361012547227063,
+          "max_drawdown": -0.1631505296540312,
+          "hit_rate": 0.6421052631578947,
+          "alpha": 0.010058954875041798,
+          "alpha_t": 2.753026554961299,
+          "beta": -0.08173567445397673
+        },
+        "avg_turnover": 0.3617410711388005
+      },
+      "train_constraints": {
+        "drawdown": false,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": false,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": 0.0014538958763641921,
+          "t_stat": 0.33219929240597523,
+          "cagr": 0.01354862560516068,
+          "ann_vol": 0.08969314387177539,
+          "sharpe": 0.19451598821546537,
+          "max_drawdown": -0.11674525972758565,
+          "hit_rate": 0.5428571428571428
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": 0.00043485590257005705,
+          "t_stat": 0.099279081847359,
+          "cagr": 0.001227195141489057,
+          "ann_vol": 0.08976608044730493,
+          "sharpe": 0.05813187793026062,
+          "max_drawdown": -0.1225747705881346,
+          "hit_rate": 0.5428571428571428,
+          "alpha": 0.0019972650905349535,
+          "alpha_t": 0.49138685337951915,
+          "beta": -0.06596437934980626
+        },
+        "avg_turnover": 0.40761598951765404
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_01/train"
+      }
+    },
+    {
+      "run_id": "run_02",
+      "params": {
+        "band_keep": 0.8296052683303284,
+        "band_add": 0.9160981700296285,
+        "sector_tol": 0.11930379922988041,
+        "exit_cap_frac": 0.03946873829006628,
+        "ls_turnover_budget": 0.30573625204858845,
+        "micro_add_frac": 0.02053087658940384,
+        "overlay_band": 0.092775634168052
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.01103426444519639,
+          "t_stat": 3.6234141547819108,
+          "cagr": 0.13489022074632073,
+          "ann_vol": 0.10282005624056095,
+          "sharpe": 1.287795184944885,
+          "max_drawdown": -0.1608502158480133,
+          "hit_rate": 0.6736842105263158
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.010086128717018573,
+          "t_stat": 3.30662236047317,
+          "cagr": 0.12215521747806779,
+          "ann_vol": 0.10298935390356209,
+          "sharpe": 1.175204426639642,
+          "max_drawdown": -0.16748028976141105,
+          "hit_rate": 0.6631578947368421,
+          "alpha": 0.010403970574837908,
+          "alpha_t": 2.8678035863269735,
+          "beta": -0.07651599443168847
+        },
+        "avg_turnover": 0.3792542912711262
+      },
+      "train_constraints": {
+        "drawdown": false,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": false,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": 0.001790664201481229,
+          "t_stat": 0.40980264386269893,
+          "cagr": 0.01766555331253694,
+          "ann_vol": 0.08954968049006606,
+          "sharpe": 0.2399558580240658,
+          "max_drawdown": -0.12137323575988834,
+          "hit_rate": 0.5428571428571428
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": 0.0007302514719691224,
+          "t_stat": 0.16706534661480812,
+          "cagr": 0.004803799016102728,
+          "ann_vol": 0.08957992823358937,
+          "sharpe": 0.09782345036913793,
+          "max_drawdown": -0.12735614129030803,
+          "hit_rate": 0.5428571428571428,
+          "alpha": 0.0020327838504726322,
+          "alpha_t": 0.49425964423326935,
+          "beta": -0.05499246970182397
+        },
+        "avg_turnover": 0.4241650918048425
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_02/train"
+      }
+    },
+    {
+      "run_id": "run_03",
+      "params": {
+        "band_keep": 0.7742154472385201,
+        "band_add": 0.9292743886380991,
+        "sector_tol": 0.09353165102989472,
+        "exit_cap_frac": 0.062295914988001425,
+        "ls_turnover_budget": 0.2864373308180314,
+        "micro_add_frac": 0.013527013250129633,
+        "overlay_band": 0.11110802205261865
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.009524685081378437,
+          "t_stat": 3.14523676564538,
+          "cagr": 0.11477572389612134,
+          "ann_vol": 0.1022467958830817,
+          "sharpe": 1.117846481050007,
+          "max_drawdown": -0.16158599913734006,
+          "hit_rate": 0.6421052631578947
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.008662982952889023,
+          "t_stat": 2.855686139472645,
+          "cagr": 0.10338180798415486,
+          "ann_vol": 0.10242581111341686,
+          "sharpe": 1.0149374879692896,
+          "max_drawdown": -0.1670717755178731,
+          "hit_rate": 0.6105263157894737,
+          "alpha": 0.008957930926658463,
+          "alpha_t": 2.4662792063343115,
+          "beta": -0.07100461114032298
+        },
+        "avg_turnover": 0.3446808513957653
+      },
+      "train_constraints": {
+        "drawdown": false,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": false,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": -0.00023923419209066294,
+          "t_stat": -0.05649203084598844,
+          "cagr": -0.006575660814007955,
+          "ann_vol": 0.08678820538671508,
+          "sharpe": -0.03307834621416654,
+          "max_drawdown": -0.1229320924923174,
+          "hit_rate": 0.5428571428571428
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": -0.0011681278568312942,
+          "t_stat": -0.27566234664016626,
+          "cagr": -0.017606625229405592,
+          "ann_vol": 0.08684355178127244,
+          "sharpe": -0.16141134251718123,
+          "max_drawdown": -0.12779665101515847,
+          "hit_rate": 0.4857142857142857,
+          "alpha": 0.0002009412009882027,
+          "alpha_t": 0.0511992375332107,
+          "beta": -0.057801625452369124
+        },
+        "avg_turnover": 0.3715574658962525
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_03/train"
+      }
+    },
+    {
+      "run_id": "run_04",
+      "params": {
+        "band_keep": 0.8182011183830106,
+        "band_add": 0.9060845616810325,
+        "sector_tol": 0.08036543810010927,
+        "exit_cap_frac": 0.06716603032474555,
+        "ls_turnover_budget": 0.3133386934394175,
+        "micro_add_frac": 0.02013661317421501,
+        "overlay_band": 0.10036826503453604
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.011754032393636408,
+          "t_stat": 3.889531918131923,
+          "cagr": 0.14473380627258714,
+          "ann_vol": 0.10203330850899278,
+          "sharpe": 1.3823759200281687,
+          "max_drawdown": -0.1326281148823799,
+          "hit_rate": 0.6526315789473685
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.010824404072075662,
+          "t_stat": 3.5775261568811065,
+          "cagr": 0.1321512919297898,
+          "ann_vol": 0.10215828743944222,
+          "sharpe": 1.2714861625093932,
+          "max_drawdown": -0.13897155038871734,
+          "hit_rate": 0.6421052631578947,
+          "alpha": 0.011247516603437669,
+          "alpha_t": 3.3158105203730237,
+          "beta": -0.10185844091080873
+        },
+        "avg_turnover": 0.371851328624297
+      },
+      "train_constraints": {
+        "drawdown": true,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": true,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": 0.002481834759445203,
+          "t_stat": 0.591630780665019,
+          "cagr": 0.02647533560945936,
+          "ann_vol": 0.08596996444538044,
+          "sharpe": 0.34642351320575376,
+          "max_drawdown": -0.10840791641342507,
+          "hit_rate": 0.5142857142857142
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": 0.0014585223421076628,
+          "t_stat": 0.34749044279508745,
+          "cagr": 0.01396096536303637,
+          "ann_vol": 0.08601909457085413,
+          "sharpe": 0.20346956908358635,
+          "max_drawdown": -0.11391556905145783,
+          "hit_rate": 0.4857142857142857,
+          "alpha": 0.002524324923172537,
+          "alpha_t": 0.6015290840242784,
+          "beta": -0.0449978189522434
+        },
+        "avg_turnover": 0.4093249669350163
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_04/train"
+      }
+    },
+    {
+      "run_id": "run_05",
+      "params": {
+        "band_keep": 0.7875930775679242,
+        "band_add": 0.9243907945085622,
+        "sector_tol": 0.10585233710570427,
+        "exit_cap_frac": 0.06876206610211563,
+        "ls_turnover_budget": 0.2854594706567789,
+        "micro_add_frac": 0.025352249321112783,
+        "overlay_band": 0.10952207869008954
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.009869639134843558,
+          "t_stat": 3.2571728757178637,
+          "cagr": 0.11934963882950012,
+          "ann_vol": 0.10230877624357866,
+          "sharpe": 1.1576296185592994,
+          "max_drawdown": -0.1588052277767832,
+          "hit_rate": 0.6421052631578947
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.00899140988860545,
+          "t_stat": 2.9610604505207347,
+          "cagr": 0.10769073189180256,
+          "ann_vol": 0.10252574840033932,
+          "sharpe": 1.052388500905674,
+          "max_drawdown": -0.16496707175326075,
+          "hit_rate": 0.6210526315789474,
+          "alpha": 0.00928778154783496,
+          "alpha_t": 2.5531706113535297,
+          "beta": -0.07134734355915051
+        },
+        "avg_turnover": 0.3512916984952424
+      },
+      "train_constraints": {
+        "drawdown": false,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": false,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": 0.0006089101148989171,
+          "t_stat": 0.1433236509539167,
+          "cagr": 0.0035606208599696654,
+          "ann_vol": 0.08706828114879941,
+          "sharpe": 0.08392173685270644,
+          "max_drawdown": -0.11974220815612835,
+          "hit_rate": 0.5428571428571428
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": -0.00037101844137174805,
+          "t_stat": -0.08730243843161734,
+          "cagr": -0.00817920116967763,
+          "ann_vol": 0.08709510914697458,
+          "sharpe": -0.0511190736204001,
+          "max_drawdown": -0.12531054649836915,
+          "hit_rate": 0.5142857142857142,
+          "alpha": 0.0009336046635193596,
+          "alpha_t": 0.2504243452698491,
+          "beta": -0.055080739451906335
+        },
+        "avg_turnover": 0.39197142250826605
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_05/train"
+      }
+    },
+    {
+      "run_id": "run_06",
+      "params": {
+        "band_keep": 0.7883203232490372,
+        "band_add": 0.9439956756417464,
+        "sector_tol": 0.0809267954775224,
+        "exit_cap_frac": 0.06833235668923758,
+        "ls_turnover_budget": 0.3258367103360426,
+        "micro_add_frac": 0.015229472811069011,
+        "overlay_band": 0.09806845154711467
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.008879232242666922,
+          "t_stat": 2.8893688047671167,
+          "cagr": 0.10607639472597463,
+          "ann_vol": 0.10375878115691477,
+          "sharpe": 1.026908621361559,
+          "max_drawdown": -0.16191575036629502,
+          "hit_rate": 0.631578947368421
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.007983507411211482,
+          "t_stat": 2.5920843969626666,
+          "cagr": 0.09431385335361053,
+          "ann_vol": 0.10399130317121223,
+          "sharpe": 0.9212509701586136,
+          "max_drawdown": -0.16841875502733805,
+          "hit_rate": 0.6,
+          "alpha": 0.008382527959600811,
+          "alpha_t": 2.4633787649422256,
+          "beta": -0.0960586320132858
+        },
+        "avg_turnover": 0.35828993258217534
+      },
+      "train_constraints": {
+        "drawdown": false,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": false,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": -0.0010625267064211566,
+          "t_stat": -0.24935438524746256,
+          "cagr": -0.016392583983765197,
+          "ann_vol": 0.0873267886378637,
+          "sharpe": -0.14600697765182122,
+          "max_drawdown": -0.12888622789242576,
+          "hit_rate": 0.5142857142857142
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": -0.0020774866803097026,
+          "t_stat": -0.48726027844159064,
+          "cagr": -0.02833043889072684,
+          "ann_vol": 0.08737795659500783,
+          "sharpe": -0.2853104047656425,
+          "max_drawdown": -0.13469644541804326,
+          "hit_rate": 0.4857142857142857,
+          "alpha": -0.0003686128447539681,
+          "alpha_t": -0.1193369801466809,
+          "beta": -0.07214806647187325
+        },
+        "avg_turnover": 0.40598398955541815
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_06/train"
+      }
+    },
+    {
+      "run_id": "run_07",
+      "params": {
+        "band_keep": 0.8154175599322852,
+        "band_add": 0.904741040363003,
+        "sector_tol": 0.09589036947462198,
+        "exit_cap_frac": 0.059536157927214256,
+        "ls_turnover_budget": 0.31640407600697484,
+        "micro_add_frac": 0.020378771257888312,
+        "overlay_band": 0.09078202707342067
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.011859705727494473,
+          "t_stat": 3.9482508530523925,
+          "cagr": 0.1462341131224254,
+          "ann_vol": 0.10141953170219423,
+          "sharpe": 1.4032451771501784,
+          "max_drawdown": -0.12749862935586687,
+          "hit_rate": 0.6631578947368421
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.010930336017366852,
+          "t_stat": 3.634804227415756,
+          "cagr": 0.13364152988199685,
+          "ann_vol": 0.10153246130869502,
+          "sharpe": 1.2918433229902366,
+          "max_drawdown": -0.13395038992822184,
+          "hit_rate": 0.6526315789473685,
+          "alpha": 0.01136447746195174,
+          "alpha_t": 3.430138429518517,
+          "beta": -0.1045134979525073
+        },
+        "avg_turnover": 0.3717478840510484
+      },
+      "train_constraints": {
+        "drawdown": true,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": true,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": 0.00281782334950722,
+          "t_stat": 0.6687674141478035,
+          "cagr": 0.03057907948633698,
+          "ann_vol": 0.0863501914678828,
+          "sharpe": 0.39159010095146596,
+          "max_drawdown": -0.10263311198548164,
+          "hit_rate": 0.5428571428571428
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": 0.00179120887034247,
+          "t_stat": 0.4250209068843841,
+          "cagr": 0.017981065482383096,
+          "ann_vol": 0.08636953528002446,
+          "sharpe": 0.24886676041987327,
+          "max_drawdown": -0.1081966042354282,
+          "hit_rate": 0.5142857142857142,
+          "alpha": 0.002838593617133532,
+          "alpha_t": 0.666117896770724,
+          "beta": -0.04422022431429706
+        },
+        "avg_turnover": 0.4106457916659004
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_07/train"
+      }
+    },
+    {
+      "run_id": "run_08",
+      "params": {
+        "band_keep": 0.7648707274166648,
+        "band_add": 0.9372665221997396,
+        "sector_tol": 0.11529916911978624,
+        "exit_cap_frac": 0.04106026230614671,
+        "ls_turnover_budget": 0.26261714981812806,
+        "micro_add_frac": 0.014329872870691299,
+        "overlay_band": 0.10812842505279815
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.009361706517978975,
+          "t_stat": 3.0289299622283026,
+          "cagr": 0.11237979526848485,
+          "ann_vol": 0.10435619043104183,
+          "sharpe": 1.076509958362095,
+          "max_drawdown": -0.1725627351126542,
+          "hit_rate": 0.631578947368421
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.008519625948111427,
+          "t_stat": 2.751261270440366,
+          "cagr": 0.10126314286455806,
+          "ann_vol": 0.10455411219580305,
+          "sharpe": 0.9778239155804433,
+          "max_drawdown": -0.17772833731665927,
+          "hit_rate": 0.6,
+          "alpha": 0.008835802569100501,
+          "alpha_t": 2.3320662447985825,
+          "beta": -0.07611511188932517
+        },
+        "avg_turnover": 0.33683222794701895
+      },
+      "train_constraints": {
+        "drawdown": false,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": false,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": -0.001691931021803169,
+          "t_stat": -0.3961594530990453,
+          "cagr": -0.023826556819752875,
+          "ann_vol": 0.08752603904409301,
+          "sharpe": -0.2319672235071656,
+          "max_drawdown": -0.1385502682684321,
+          "hit_rate": 0.4857142857142857
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": -0.0025988784139965933,
+          "t_stat": -0.6082399443445508,
+          "cagr": -0.03442553678414262,
+          "ann_vol": 0.08756603180225463,
+          "sharpe": -0.35614884363363525,
+          "max_drawdown": -0.1431065627668745,
+          "hit_rate": 0.42857142857142855,
+          "alpha": -0.0009210395834927439,
+          "alpha_t": -0.25180743984911924,
+          "beta": -0.07083777921669376
+        },
+        "avg_turnover": 0.36277895687736966
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_08/train"
+      }
+    },
+    {
+      "run_id": "run_09",
+      "params": {
+        "band_keep": 0.8191192082182532,
+        "band_add": 0.9027556845757927,
+        "sector_tol": 0.08495767247886057,
+        "exit_cap_frac": 0.06773663256565816,
+        "ls_turnover_budget": 0.2620299928400281,
+        "micro_add_frac": 0.029181996071167858,
+        "overlay_band": 0.11592588762393818
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.012268213374999021,
+          "t_stat": 4.053773751226429,
+          "cagr": 0.15171804095452246,
+          "ann_vol": 0.1021819626928358,
+          "sharpe": 1.440748999336945,
+          "max_drawdown": -0.13399618986789574,
+          "hit_rate": 0.6736842105263158
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.01135125046571687,
+          "t_stat": 3.7464751041547384,
+          "cagr": 0.13923734544759747,
+          "ann_vol": 0.10229944585062609,
+          "sharpe": 1.3315321940990628,
+          "max_drawdown": -0.14032332933689573,
+          "hit_rate": 0.6736842105263158,
+          "alpha": 0.011648019691355973,
+          "alpha_t": 3.3601624817152356,
+          "beta": -0.07144305212753062
+        },
+        "avg_turnover": 0.3667851637128619
+      },
+      "train_constraints": {
+        "drawdown": true,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": true,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": 0.0030255330536463946,
+          "t_stat": 0.7130132697789343,
+          "cagr": 0.03308991741546108,
+          "ann_vol": 0.08696188291449372,
+          "sharpe": 0.4174978211943205,
+          "max_drawdown": -0.1096448221820715,
+          "hit_rate": 0.5714285714285714
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": 0.0020171000273561685,
+          "t_stat": 0.47520107396112027,
+          "cagr": 0.020685086817360032,
+          "ann_vol": 0.08699106884605025,
+          "sharpe": 0.27824925764632713,
+          "max_drawdown": -0.11508641415841991,
+          "hit_rate": 0.5714285714285714,
+          "alpha": 0.0015252066918657885,
+          "alpha_t": 0.34190318281017507,
+          "beta": 0.020767567697290087
+        },
+        "avg_turnover": 0.40337321051609043
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_09/train",
+        "oos": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_09/oos"
+      },
+      "oos": {
+        "raw": {
+          "months": 69,
+          "mean_monthly": 0.008599077963963342,
+          "t_stat": 2.4972505880306817,
+          "cagr": 0.10292221991200745,
+          "ann_vol": 0.09908431945595153,
+          "sharpe": 1.041425486233806,
+          "max_drawdown": -0.1331588098826404,
+          "hit_rate": 0.6811594202898551
+        },
+        "cost_50": {
+          "months": 69,
+          "mean_monthly": 0.0077526640486608065,
+          "t_stat": 2.250902367124104,
+          "cagr": 0.09185460278543989,
+          "ann_vol": 0.09910817415432774,
+          "sharpe": 0.9386911763611302,
+          "max_drawdown": -0.13709624716175317,
+          "hit_rate": 0.6811594202898551,
+          "alpha": 0.008467457215664047,
+          "alpha_t": 2.283023720709808,
+          "beta": -0.11251661421820768
+        },
+        "avg_turnover": 0.33856556612101485
+      }
+    },
+    {
+      "run_id": "run_10",
+      "params": {
+        "band_keep": 0.8430322964980694,
+        "band_add": 0.9243110786970657,
+        "sector_tol": 0.08235477281175822,
+        "exit_cap_frac": 0.0360126732841349,
+        "ls_turnover_budget": 0.3304868377266961,
+        "micro_add_frac": 0.016510609228347444,
+        "overlay_band": 0.11126835839888877
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.010583298655954157,
+          "t_stat": 3.4519187128937583,
+          "cagr": 0.12874496487706755,
+          "ann_vol": 0.10351729556387496,
+          "sharpe": 1.226844105418937,
+          "max_drawdown": -0.15809744704623352,
+          "hit_rate": 0.6631578947368421
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.009617747423196746,
+          "t_stat": 3.130520094888378,
+          "cagr": 0.11583681287141245,
+          "ann_vol": 0.10373117502557842,
+          "sharpe": 1.1126160390056508,
+          "max_drawdown": -0.1648476299683872,
+          "hit_rate": 0.6631578947368421,
+          "alpha": 0.009877960333410827,
+          "alpha_t": 2.6991468497630353,
+          "beta": -0.0626426290281478
+        },
+        "avg_turnover": 0.38622049310296436
+      },
+      "train_constraints": {
+        "drawdown": false,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": false,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": 0.0013015697598528515,
+          "t_stat": 0.30390179678490875,
+          "cagr": 0.011866760001850718,
+          "ann_vol": 0.08777257251370305,
+          "sharpe": 0.17794667139094966,
+          "max_drawdown": -0.12118272448775524,
+          "hit_rate": 0.5714285714285714
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": 0.0002289774758447694,
+          "t_stat": 0.053501834370481935,
+          "cagr": -0.0010661890840194532,
+          "ann_vol": 0.0877099243082988,
+          "sharpe": 0.03132746643902019,
+          "max_drawdown": -0.12731793487745524,
+          "hit_rate": 0.5714285714285714,
+          "alpha": 0.0016738037477636153,
+          "alpha_t": 0.4309400496078506,
+          "beta": -0.06100006901493106
+        },
+        "avg_turnover": 0.4290369136032327
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_10/train"
+      }
+    },
+    {
+      "run_id": "run_11",
+      "params": {
+        "band_keep": 0.7901474200353217,
+        "band_add": 0.9034854702163089,
+        "sector_tol": 0.10956147182825403,
+        "exit_cap_frac": 0.05835993098000672,
+        "ls_turnover_budget": 0.33839917588648166,
+        "micro_add_frac": 0.023506622479095674,
+        "overlay_band": 0.0959032710554587
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.011325407095122959,
+          "t_stat": 3.7928743218388115,
+          "cagr": 0.13904986971099342,
+          "ann_vol": 0.10081793436366453,
+          "sharpe": 1.3480229088134992,
+          "max_drawdown": -0.12609609741482097,
+          "hit_rate": 0.6526315789473685
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.010423454205425273,
+          "t_stat": 3.4850866304219776,
+          "cagr": 0.12689126220152436,
+          "ann_vol": 0.10098352126527582,
+          "sharpe": 1.238632292654205,
+          "max_drawdown": -0.13250904299735988,
+          "hit_rate": 0.6421052631578947,
+          "alpha": 0.01086760405622069,
+          "alpha_t": 3.295215626093345,
+          "beta": -0.10692288216366486
+        },
+        "avg_turnover": 0.3607811558790726
+      },
+      "train_constraints": {
+        "drawdown": true,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": true,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": 0.0023154444283562878,
+          "t_stat": 0.5566478206077328,
+          "cagr": 0.024493980846461705,
+          "ann_vol": 0.08524688027262439,
+          "sharpe": 0.325939589242637,
+          "max_drawdown": -0.09975709538619981,
+          "hit_rate": 0.5428571428571428
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": 0.0013064171403241573,
+          "t_stat": 0.3137171518286148,
+          "cagr": 0.012171135594319038,
+          "ann_vol": 0.0853430680386939,
+          "sharpe": 0.18369395481285075,
+          "max_drawdown": -0.10528848075762054,
+          "hit_rate": 0.5142857142857142,
+          "alpha": 0.0022888717755269717,
+          "alpha_t": 0.5586972851904118,
+          "beta": -0.04147889730148594
+        },
+        "avg_turnover": 0.40361091521285236
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_11/train"
+      }
+    },
+    {
+      "run_id": "run_12",
+      "params": {
+        "band_keep": 0.7610871654576876,
+        "band_add": 0.8851440438427004,
+        "sector_tol": 0.08930002946963797,
+        "exit_cap_frac": 0.053306187931330774,
+        "ls_turnover_budget": 0.3386028849696141,
+        "micro_add_frac": 0.023119596348653584,
+        "overlay_band": 0.10149415769520624
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.010724222038177586,
+          "t_stat": 3.5603607301143567,
+          "cagr": 0.1308466435885869,
+          "ann_vol": 0.10170076521154571,
+          "sharpe": 1.265385409740469,
+          "max_drawdown": -0.14664131140634573,
+          "hit_rate": 0.6526315789473685
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.009856513036813312,
+          "t_stat": 3.264680091753945,
+          "cagr": 0.11921565847145277,
+          "ann_vol": 0.10193776219946185,
+          "sharpe": 1.1602977531557401,
+          "max_drawdown": -0.15246449274451335,
+          "hit_rate": 0.6210526315789474,
+          "alpha": 0.010352082512871758,
+          "alpha_t": 3.198676703352774,
+          "beta": -0.11930143981273736
+        },
+        "avg_turnover": 0.3470836005457107
+      },
+      "train_constraints": {
+        "drawdown": true,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": true,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": 0.0002303811746919691,
+          "t_stat": 0.053027514950459646,
+          "cagr": -0.0011258195675075688,
+          "ann_vol": 0.08903696719252284,
+          "sharpe": 0.0310497334250598,
+          "max_drawdown": -0.12935190756050496,
+          "hit_rate": 0.5142857142857142
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": -0.0007321118565685106,
+          "t_stat": -0.16813209266716175,
+          "cagr": -0.012623466503187686,
+          "ann_vol": 0.08923833671997135,
+          "sharpe": -0.09844807289932361,
+          "max_drawdown": -0.13422697835111375,
+          "hit_rate": 0.45714285714285713,
+          "alpha": 0.00010098531127334938,
+          "alpha_t": 0.025357067888786118,
+          "beta": -0.03517307632218326
+        },
+        "avg_turnover": 0.3849972125041915
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_12/train"
+      }
+    },
+    {
+      "run_id": "run_13",
+      "params": {
+        "band_keep": 0.7701731539928296,
+        "band_add": 0.9684532471059943,
+        "sector_tol": 0.0977534337469528,
+        "exit_cap_frac": 0.04647460796220846,
+        "ls_turnover_budget": 0.2690890747551874,
+        "micro_add_frac": 0.027925889908922266,
+        "overlay_band": 0.10636649855795684
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.007668572246632743,
+          "t_stat": 2.4821742622104903,
+          "cagr": 0.09018541951153991,
+          "ann_vol": 0.10431209577322037,
+          "sharpe": 0.8821878831737322,
+          "max_drawdown": -0.1319867910720366,
+          "hit_rate": 0.6
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.00678893913607858,
+          "t_stat": 2.1953010098676495,
+          "cagr": 0.0787993507855671,
+          "ann_vol": 0.10441436788861233,
+          "sharpe": 0.7802304537231025,
+          "max_drawdown": -0.13856149739467316,
+          "hit_rate": 0.6,
+          "alpha": 0.007008299217036423,
+          "alpha_t": 2.2470380397064096,
+          "beta": -0.0528078801459985
+        },
+        "avg_turnover": 0.35185324422166536
+      },
+      "train_constraints": {
+        "drawdown": true,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": true,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": 0.0013341341448095095,
+          "t_stat": 0.30106350785316993,
+          "cagr": 0.012027232876391736,
+          "ann_vol": 0.09081676483830761,
+          "sharpe": 0.1762847395656299,
+          "max_drawdown": -0.09474076499188999,
+          "hit_rate": 0.5428571428571428
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": 0.0004451980148019501,
+          "t_stat": 0.10046405919708211,
+          "cagr": 0.001291270970698255,
+          "ann_vol": 0.09081699814317343,
+          "sharpe": 0.0588257296194829,
+          "max_drawdown": -0.1003838620177403,
+          "hit_rate": 0.5428571428571428,
+          "alpha": 0.0026143766329070842,
+          "alpha_t": 0.6446510337054149,
+          "beta": -0.09158197631220691
+        },
+        "avg_turnover": 0.35557445200302346
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_13/train"
+      }
+    },
+    {
+      "run_id": "run_14",
+      "params": {
+        "band_keep": 0.7612601102316221,
+        "band_add": 0.9009317232054667,
+        "sector_tol": 0.08480692057426921,
+        "exit_cap_frac": 0.0362541268390597,
+        "ls_turnover_budget": 0.270143403676092,
+        "micro_add_frac": 0.017675013112733572,
+        "overlay_band": 0.08856979155110825
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.011306217010202041,
+          "t_stat": 3.7575275681308633,
+          "cagr": 0.1387126606698308,
+          "ann_vol": 0.10159388471990569,
+          "sharpe": 1.3354603428787009,
+          "max_drawdown": -0.14257702940991668,
+          "hit_rate": 0.6421052631578947
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.010468134907360704,
+          "t_stat": 3.473289563645064,
+          "cagr": 0.12741250908545232,
+          "ann_vol": 0.10176085451729831,
+          "sharpe": 1.2344395050945127,
+          "max_drawdown": -0.14790341641367122,
+          "hit_rate": 0.6210526315789474,
+          "alpha": 0.010919582228213508,
+          "alpha_t": 3.263672503546709,
+          "beta": -0.10867964630450755
+        },
+        "avg_turnover": 0.33523284113653445
+      },
+      "train_constraints": {
+        "drawdown": true,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": true,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": 0.0011964381389716772,
+          "t_stat": 0.2778585705387007,
+          "cagr": 0.010589513585994581,
+          "ann_vol": 0.08824520100848592,
+          "sharpe": 0.1626973195548559,
+          "max_drawdown": -0.11747205642886771,
+          "hit_rate": 0.4857142857142857
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": 0.0002832402694566653,
+          "t_stat": 0.06572914770235916,
+          "cagr": -0.0004284430163843389,
+          "ann_vol": 0.08831239100200315,
+          "sharpe": 0.03848704802254633,
+          "max_drawdown": -0.12194437119415591,
+          "hit_rate": 0.4857142857142857,
+          "alpha": 0.0013298498533544428,
+          "alpha_t": 0.29179374813284353,
+          "beta": -0.04418749720315074
+        },
+        "avg_turnover": 0.36527914780600484
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_14/train"
+      }
+    },
+    {
+      "run_id": "run_15",
+      "params": {
+        "band_keep": 0.8417194296665234,
+        "band_add": 0.9483098703286156,
+        "sector_tol": 0.11722392817972893,
+        "exit_cap_frac": 0.0379945238103201,
+        "ls_turnover_budget": 0.33119420031411645,
+        "micro_add_frac": 0.018425900676477917,
+        "overlay_band": 0.1172499985002363
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.009279793438306913,
+          "t_stat": 3.0117963486142907,
+          "cagr": 0.11133815027881022,
+          "ann_vol": 0.1040315651482023,
+          "sharpe": 1.0704205122843644,
+          "max_drawdown": -0.14783680005157585,
+          "hit_rate": 0.6
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.008327303024862518,
+          "t_stat": 2.695770467873281,
+          "cagr": 0.09877775824859225,
+          "ann_vol": 0.1042974962588088,
+          "sharpe": 0.9581019668045049,
+          "max_drawdown": -0.15507846018610538,
+          "hit_rate": 0.6,
+          "alpha": 0.008728787347777347,
+          "alpha_t": 2.5146216214907016,
+          "beta": -0.09665175136882875
+        },
+        "avg_turnover": 0.3809961653777581
+      },
+      "train_constraints": {
+        "drawdown": true,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": true,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": -0.00037181847145352547,
+          "t_stat": -0.09010822576092145,
+          "cagr": -0.007959079026303328,
+          "ann_vol": 0.08456510021554481,
+          "sharpe": -0.05276197445600768,
+          "max_drawdown": -0.12125600539572479,
+          "hit_rate": 0.45714285714285713
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": -0.0014381785003135547,
+          "t_stat": -0.3484959514532953,
+          "cagr": -0.0205919819620628,
+          "ann_vol": 0.08457455086016756,
+          "sharpe": -0.20405833466732362,
+          "max_drawdown": -0.1277613438276708,
+          "hit_rate": 0.45714285714285713,
+          "alpha": 0.0004756189346750014,
+          "alpha_t": 0.14417236118084512,
+          "beta": -0.08079987046460432
+        },
+        "avg_turnover": 0.4265440115440116
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_15/train"
+      }
+    },
+    {
+      "run_id": "run_16",
+      "params": {
+        "band_keep": 0.7770180737183962,
+        "band_add": 0.9353281534611193,
+        "sector_tol": 0.08724603784949243,
+        "exit_cap_frac": 0.030815044358423152,
+        "ls_turnover_budget": 0.3017348108918237,
+        "micro_add_frac": 0.012034716746631298,
+        "overlay_band": 0.0954192726889833
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.009874646349184061,
+          "t_stat": 3.2039516267687036,
+          "cagr": 0.11922032798480786,
+          "ann_vol": 0.10406100740011996,
+          "sharpe": 1.138714290306516,
+          "max_drawdown": -0.1616560965649697,
+          "hit_rate": 0.6526315789473685
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.00901361183895999,
+          "t_stat": 2.9196913766039234,
+          "cagr": 0.10779378509085658,
+          "ann_vol": 0.10423518228962256,
+          "sharpe": 1.03768554620054,
+          "max_drawdown": -0.16715956573191426,
+          "hit_rate": 0.631578947368421,
+          "alpha": 0.009330815824325813,
+          "alpha_t": 2.5013176601139446,
+          "beta": -0.07636243553470803
+        },
+        "avg_turnover": 0.34441380408962957
+      },
+      "train_constraints": {
+        "drawdown": false,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": false,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": -0.0008011196520894971,
+          "t_stat": -0.1882790995238266,
+          "cagr": -0.013290721000686956,
+          "ann_vol": 0.08720068933158363,
+          "sharpe": -0.1102449521759919,
+          "max_drawdown": -0.12678128842675507,
+          "hit_rate": 0.5428571428571428
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": -0.0017478124689642416,
+          "t_stat": -0.41081853968401383,
+          "cagr": -0.024456739383624138,
+          "ann_vol": 0.08719055537942555,
+          "sharpe": -0.24055070570774337,
+          "max_drawdown": -0.13168070527833686,
+          "hit_rate": 0.5142857142857142,
+          "alpha": -0.00037101592614041375,
+          "alpha_t": -0.10590685841968028,
+          "beta": -0.058127877215461685
+        },
+        "avg_turnover": 0.3786771267498977
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_16/train"
+      }
+    },
+    {
+      "run_id": "run_17",
+      "params": {
+        "band_keep": 0.8012935262950105,
+        "band_add": 0.9425696340538285,
+        "sector_tol": 0.10380197523238933,
+        "exit_cap_frac": 0.06828433988084069,
+        "ls_turnover_budget": 0.3212569499035699,
+        "micro_add_frac": 0.019060058955544152,
+        "overlay_band": 0.08717783300983961
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.00923281088489727,
+          "t_stat": 3.0172507639455572,
+          "cagr": 0.11078981792402987,
+          "ann_vol": 0.10331775475880936,
+          "sharpe": 1.072359062364549,
+          "max_drawdown": -0.1584949044876529,
+          "hit_rate": 0.6210526315789474
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.00831398384220526,
+          "t_stat": 2.7107971831695363,
+          "cagr": 0.09867892259335154,
+          "ann_vol": 0.10355345086869307,
+          "sharpe": 0.9634426015697902,
+          "max_drawdown": -0.16501684290455476,
+          "hit_rate": 0.6,
+          "alpha": 0.008707590771283557,
+          "alpha_t": 2.6053292305167046,
+          "beta": -0.09475537866616401
+        },
+        "avg_turnover": 0.3675308170768024
+      },
+      "train_constraints": {
+        "drawdown": false,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": false,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": -0.00012872611645868272,
+          "t_stat": -0.030222186877969605,
+          "cagr": -0.0052956747659893555,
+          "ann_vol": 0.08729018736938736,
+          "sharpe": -0.017696300627324843,
+          "max_drawdown": -0.12702430336278325,
+          "hit_rate": 0.5142857142857142
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": -0.0011640456680825821,
+          "t_stat": -0.27324068337297236,
+          "cagr": -0.01759459926013096,
+          "ann_vol": 0.08730704742008868,
+          "sharpe": -0.15999336170171444,
+          "max_drawdown": -0.13292601835619255,
+          "hit_rate": 0.4857142857142857,
+          "alpha": 0.00047363349592399967,
+          "alpha_t": 0.14859373597150374,
+          "beta": -0.06914225188890202
+        },
+        "avg_turnover": 0.41412782064955983
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_17/train"
+      }
+    },
+    {
+      "run_id": "run_18",
+      "params": {
+        "band_keep": 0.7789500611279613,
+        "band_add": 0.9002680907450102,
+        "sector_tol": 0.10037527810436599,
+        "exit_cap_frac": 0.0681617840693205,
+        "ls_turnover_budget": 0.29424369446461285,
+        "micro_add_frac": 0.014324136340527531,
+        "overlay_band": 0.09560598481188305
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.01222754322714887,
+          "t_stat": 4.076113259707829,
+          "cagr": 0.15127099507868524,
+          "ann_vol": 0.10128505997541408,
+          "sharpe": 1.4486886690041332,
+          "max_drawdown": -0.12659366837958297,
+          "hit_rate": 0.6631578947368421
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.011359820423334522,
+          "t_stat": 3.782257027221919,
+          "cagr": 0.13946047467307898,
+          "ann_vol": 0.10140814845738291,
+          "sharpe": 1.3442494232828068,
+          "max_drawdown": -0.13240957448090462,
+          "hit_rate": 0.6421052631578947,
+          "alpha": 0.011795040913695539,
+          "alpha_t": 3.551787102842147,
+          "beta": -0.10477326317400494
+        },
+        "avg_turnover": 0.34708912152573945
+      },
+      "train_constraints": {
+        "drawdown": true,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": true,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": 0.0026714237165179587,
+          "t_stat": 0.6336707474869417,
+          "cagr": 0.028780716771309667,
+          "ann_vol": 0.08639801476314933,
+          "sharpe": 0.37103959721871477,
+          "max_drawdown": -0.10374397415094527,
+          "hit_rate": 0.5714285714285714
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": 0.0017208819110709598,
+          "t_stat": 0.4079659054276965,
+          "cagr": 0.017127186318606213,
+          "ann_vol": 0.08644738191191721,
+          "sharpe": 0.23888037412044205,
+          "max_drawdown": -0.1086663866846751,
+          "hit_rate": 0.5142857142857142,
+          "alpha": 0.0025336384208620244,
+          "alpha_t": 0.5825028647305978,
+          "beta": -0.03431430072471315
+        },
+        "avg_turnover": 0.38021672217879926
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_18/train",
+        "oos": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_18/oos"
+      },
+      "oos": {
+        "raw": {
+          "months": 69,
+          "mean_monthly": 0.007786765686178564,
+          "t_stat": 2.2767329162210976,
+          "cagr": 0.09234592870756497,
+          "ann_vol": 0.09841474880876648,
+          "sharpe": 0.9494632599805946,
+          "max_drawdown": -0.1420461790622859,
+          "hit_rate": 0.6666666666666666
+        },
+        "cost_50": {
+          "months": 69,
+          "mean_monthly": 0.006962393236205033,
+          "t_stat": 2.034632780261619,
+          "cagr": 0.08165751585098846,
+          "ann_vol": 0.0984663137755932,
+          "sharpe": 0.8485005239951369,
+          "max_drawdown": -0.1506918475673329,
+          "hit_rate": 0.6666666666666666,
+          "alpha": 0.007561252143544852,
+          "alpha_t": 2.019458717070905,
+          "beta": -0.09426723667601378
+        },
+        "avg_turnover": 0.3297489799894129
+      }
+    },
+    {
+      "run_id": "run_19",
+      "params": {
+        "band_keep": 0.7974219009894099,
+        "band_add": 0.9005435863101976,
+        "sector_tol": 0.08882579618686924,
+        "exit_cap_frac": 0.03314638625881137,
+        "ls_turnover_budget": 0.27570533975368067,
+        "micro_add_frac": 0.020738837024098417,
+        "overlay_band": 0.08409341494812914
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.011849872686723627,
+          "t_stat": 3.9514162592865296,
+          "cagr": 0.14612038986803144,
+          "ann_vol": 0.1012542654677609,
+          "sharpe": 1.404370192048444,
+          "max_drawdown": -0.1266163730364026,
+          "hit_rate": 0.6842105263157895
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.010973351228954258,
+          "t_stat": 3.6536556487402154,
+          "cagr": 0.1342367536049316,
+          "ann_vol": 0.10140610279302381,
+          "sharpe": 1.298543293949661,
+          "max_drawdown": -0.13259441440676778,
+          "hit_rate": 0.6736842105263158,
+          "alpha": 0.011423435414122475,
+          "alpha_t": 3.4844066581085316,
+          "beta": -0.10835149039965986
+        },
+        "avg_turnover": 0.35060858310774845
+      },
+      "train_constraints": {
+        "drawdown": true,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": true,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": 0.002872293600934872,
+          "t_stat": 0.6705989372831586,
+          "cagr": 0.0311355824823758,
+          "ann_vol": 0.0877789971854153,
+          "sharpe": 0.39266253108830595,
+          "max_drawdown": -0.1045928130896856,
+          "hit_rate": 0.5714285714285714
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": 0.001895950000694526,
+          "t_stat": 0.4424030662844913,
+          "cagr": 0.019142648667148654,
+          "ann_vol": 0.08782808164057665,
+          "sharpe": 0.25904471079581387,
+          "max_drawdown": -0.10962166053664768,
+          "hit_rate": 0.5714285714285714,
+          "alpha": 0.0029263529735671385,
+          "alpha_t": 0.6607892545388266,
+          "beta": -0.043503259651379016
+        },
+        "avg_turnover": 0.3905374400961384
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_19/train",
+        "oos": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_19/oos"
+      },
+      "oos": {
+        "raw": {
+          "months": 69,
+          "mean_monthly": 0.007670216604357723,
+          "t_stat": 2.2626676582796557,
+          "cagr": 0.09092365502924604,
+          "ann_vol": 0.09754432944814455,
+          "sharpe": 0.9435976419441516,
+          "max_drawdown": -0.1405900626480482,
+          "hit_rate": 0.6666666666666666
+        },
+        "cost_50": {
+          "months": 69,
+          "mean_monthly": 0.006837790261058167,
+          "t_stat": 2.0159913511633354,
+          "cagr": 0.08014405100493494,
+          "ann_vol": 0.09759830586037051,
+          "sharpe": 0.8407265106639066,
+          "max_drawdown": -0.1451857935411064,
+          "hit_rate": 0.6666666666666666,
+          "alpha": 0.007431603506666247,
+          "alpha_t": 1.9846543175621738,
+          "beta": -0.09347299185002361
+        },
+        "avg_turnover": 0.3329705373198223
+      }
+    },
+    {
+      "run_id": "run_20",
+      "params": {
+        "band_keep": 0.8183562939482991,
+        "band_add": 0.9398776748892379,
+        "sector_tol": 0.08643856161336005,
+        "exit_cap_frac": 0.05130974149982305,
+        "ls_turnover_budget": 0.25161772553387196,
+        "micro_add_frac": 0.01556762044775039,
+        "overlay_band": 0.10477940379323754
+      },
+      "train": {
+        "raw": {
+          "months": 95,
+          "mean_monthly": 0.009097020543142537,
+          "t_stat": 2.9679577250293554,
+          "cagr": 0.10897193557423113,
+          "ann_vol": 0.10348892851862632,
+          "sharpe": 1.0548398565945405,
+          "max_drawdown": -0.17821757555483042,
+          "hit_rate": 0.631578947368421
+        },
+        "cost_50": {
+          "months": 95,
+          "mean_monthly": 0.008178967091787722,
+          "t_stat": 2.662961698482264,
+          "cagr": 0.09689186956171025,
+          "ann_vol": 0.10370172162302786,
+          "sharpe": 0.9464414241668494,
+          "max_drawdown": -0.18478376321640388,
+          "hit_rate": 0.6210526315789474,
+          "alpha": 0.008598464319124992,
+          "alpha_t": 2.5184076260791644,
+          "beta": -0.10098810688833834
+        },
+        "avg_turnover": 0.36722138054192727
+      },
+      "train_constraints": {
+        "drawdown": false,
+        "turnover": true,
+        "alpha_t": true,
+        "net_sharpe": true
+      },
+      "train_constraints_pass": false,
+      "cv": {
+        "raw": {
+          "months": 35,
+          "mean_monthly": -0.0009427023796588199,
+          "t_stat": -0.21234555113155223,
+          "cagr": -0.015303451853118766,
+          "ann_vol": 0.09098212625450701,
+          "sharpe": -0.12433682330374698,
+          "max_drawdown": -0.1428182192282863,
+          "hit_rate": 0.5428571428571428
+        },
+        "cost_50": {
+          "months": 35,
+          "mean_monthly": -0.001977626450297177,
+          "t_stat": -0.4454287952428557,
+          "cagr": -0.027483243441497995,
+          "ann_vol": 0.09098936164917659,
+          "sharpe": -0.26081639626252806,
+          "max_drawdown": -0.14880934478138164,
+          "hit_rate": 0.5142857142857142,
+          "alpha": -0.00012764996359136845,
+          "alpha_t": -0.034459546219691994,
+          "beta": -0.07810537194564007
+        },
+        "avg_turnover": 0.41396962825534256
+      },
+      "dirs": {
+        "train": "/Users/hemerson/Library/CloudStorage/GoogleDrive-hemersondv@gmail.com/My Drive/Mel Research/momentum-v3/results/tuning/20251021_210630/run_20/train"
+      }
+    }
+  ],
+  "top_runs": [
+    "run_18",
+    "run_09",
+    "run_19"
+  ]
+}

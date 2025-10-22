@@ -25,24 +25,26 @@ class Config:
     overlay_lookback_months: int = 36
     overlay_halflife_days: int = 60
     overlay_shrink: float = 0.5
-    overlay_band: float = 0.10
-    band_keep: float = 0.80
-    band_add: float = 0.90
+    overlay_band: float = 0.11293
+    band_keep: float = 0.81393
+    band_add: float = 0.90307
     gross_per_side: float = 0.50
     gross_tol: float = 0.02
     single_cap_pct: float = 0.025
     floor_factor: float = 0.25
-    sector_tol: float = 0.10
+    sector_tol: float = 0.09218
     effn_ratio: float = 0.70
     zero_frac: float = 0.20
     max_add_frac: float = 0.05
-    exit_cap_frac: float = 0.05
+    exit_cap_frac: float = 0.07257
     adaptive_exit_cap: bool = True
     cap_min: float = 0.05
     cap_max: float = 0.12
-    ls_turnover_budget: float = 0.30
+    ls_turnover_budget: float = 0.32496
     use_turnover_budget: bool = True
-    micro_add_frac: float = 0.02
+    micro_add_frac: float = 0.01774
+    kill_alpha_t_min: float = 2.0
+    kill_net_sharpe_min: float = 0.0
     # Vol targeting
     apply_vol_target: bool = False
     vol_target_ann: float = 0.10
@@ -54,6 +56,7 @@ class Config:
     # Cold start options
     cold_start: bool = False
     ramp_frac: Optional[float] = None
+    out_dir: str = "results"
 
 
 def read_equity_data(cfg: Config) -> pd.DataFrame:
@@ -245,6 +248,8 @@ def max_drawdown(returns: pd.Series) -> float:
 
 
 def run_analysis(cfg: Config) -> None:
+    out_dir = os.path.abspath(cfg.out_dir)
+    os.makedirs(out_dir, exist_ok=True)
     # 1) Load data
     print("Loading equity data ...")
     df = read_equity_data(cfg)
@@ -514,7 +519,13 @@ def run_analysis(cfg: Config) -> None:
             stock_ret = pd.Series(index=eligible, dtype=float)  # Empty returns for live mode
         else:
             start_open = po.loc[d_trade]
-            end_open = po.loc[d_next_trade]
+            end_open = po.loc[d_next_trade].reindex(start_open.index)
+            # Conservative handling: assume vanished names are full write-offs.
+            if len(labels) > 0:
+                missing_end = labels.index[end_open.reindex(labels.index).isna()]
+                if len(missing_end) > 0:
+                    end_open = end_open.copy()
+                    end_open.loc[missing_end] = 0.0
             stock_ret = (end_open / start_open - 1.0).dropna()
         # intersect with names having returns
         valid_names = stock_ret.index.intersection(labels.index)
@@ -1114,8 +1125,6 @@ def run_analysis(cfg: Config) -> None:
             # Write targets export (per month) and optional orders export
             try:
                 if target_rows:
-                    out_dir = os.path.join(os.getcwd(), "results")
-                    os.makedirs(out_dir, exist_ok=True)
                     period_label = pd.Period(d_mend, freq='M').strftime('%Y-%m')
                     df_targets = pd.DataFrame(target_rows)
                     # Apply vol-target scale to LS weights for live executables (orders/targets)
@@ -1400,7 +1409,7 @@ def run_analysis(cfg: Config) -> None:
                                 pass
                 # Minimal state snapshots (optional)
                 if getattr(cfg, 'write_state_snapshots', False):
-                    state_dir = os.path.join(os.getcwd(), "state")
+                    state_dir = os.path.join(out_dir, "state")
                     os.makedirs(state_dir, exist_ok=True)
                     period_label = pd.Period(d_mend, freq='M').strftime('%Y-%m')
                     for j in range(cfg.cohorts):
@@ -1774,7 +1783,7 @@ def run_analysis(cfg: Config) -> None:
     kill_triggered = False
     ls_50 = next((g for g in grid_results if g["bps"] == 50), None)
     if ls_50 is not None and (ls_50.get("LS_ir") is not None):
-        if not np.isfinite(ls_50["LS_ir"]) or ls_50["LS_ir"] <= 0:
+        if (not np.isfinite(ls_50["LS_ir"])) or (ls_50["LS_ir"] <= cfg.kill_net_sharpe_min):
             kill_triggered = True
 
     # Subperiod alpha significance for LS at 50 bps
@@ -1790,7 +1799,8 @@ def run_analysis(cfg: Config) -> None:
             sub_ls = ls_net.loc[m]
             sub_bm = pf["BOVA11"].loc[m]
             al = ols_alpha_newey_west(sub_ls, sub_bm, lags=cfg.nw_lags)
-            if not np.isfinite(al["alpha_t"]) or abs(al["alpha_t"]) < 2.0:
+            alpha_t = al.get("alpha_t", np.nan)
+            if (not np.isfinite(alpha_t)) or (abs(alpha_t) < cfg.kill_alpha_t_min):
                 kill_triggered = True
                 break
 
@@ -1891,16 +1901,12 @@ def run_analysis(cfg: Config) -> None:
     if kill_triggered:
         print("\nKill rule triggered: LS Sharpe <= 0 after 50 bps, or LS alpha insignificant (|t|<2) in a long subperiod.")
         # Save and exit early
-        out_dir = os.path.join(os.getcwd(), "results")
-        os.makedirs(out_dir, exist_ok=True)
         pf.to_csv(os.path.join(out_dir, "momentum_br_timeseries.csv"))
         pd.Series(results).to_json(os.path.join(out_dir, "momentum_br_summary.json"))
         pd.DataFrame(grid_results).to_csv(os.path.join(out_dir, "momentum_br_cost_grid.csv"), index=False)
         return
 
     # Save timeseries
-    out_dir = os.path.join(os.getcwd(), "results")
-    os.makedirs(out_dir, exist_ok=True)
     pf.to_csv(os.path.join(out_dir, "momentum_br_timeseries.csv"))
     pd.Series(results).to_json(os.path.join(out_dir, "momentum_br_summary.json"))
     pd.DataFrame(grid_results).to_csv(os.path.join(out_dir, "momentum_br_cost_grid.csv"), index=False)
@@ -1931,7 +1937,7 @@ def make_parser() -> argparse.ArgumentParser:
                    help="EWMA halflife in trading days for beta estimate (approx converted to months)")
     p.add_argument("--overlay-shrink", type=float, default=0.5,
                    help="Shrinkage toward 0 for beta estimate (0..1), e.g., 0.5")
-    p.add_argument("--overlay-band", type=float, default=0.10,
+    p.add_argument("--overlay-band", type=float, default=0.11293,
                    help="Do not update hedge if |beta_hat| <= band; carry previous hedge")
     # Vol targeting options
     try:
@@ -1947,17 +1953,17 @@ def make_parser() -> argparse.ArgumentParser:
                    help="Rolling window in months for realized vol estimate (e.g., 36)")
     p.add_argument("--vol-min-months", type=int, default=12,
                    help="Minimum months required for realized vol estimate (default 12)")
-    p.add_argument("--band-keep", type=float, default=0.80,
+    p.add_argument("--band-keep", type=float, default=0.81393,
                    help="Keep band percentile threshold (e.g., 0.80)")
-    p.add_argument("--band-add", type=float, default=0.90,
+    p.add_argument("--band-add", type=float, default=0.90307,
                    help="Add band percentile threshold (e.g., 0.90)")
-    p.add_argument("--sector-tol", type=float, default=0.10,
+    p.add_argument("--sector-tol", type=float, default=0.09218,
                    help="Sector share tolerance per side (e.g., 0.10 = 10pp)")
     p.add_argument("--gross-tol", type=float, default=0.02,
                    help="Side gross renorm tolerance around 0.50 (e.g., 0.02 = ±2pp)")
-    p.add_argument("--exit-cap-frac", type=float, default=0.05,
+    p.add_argument("--exit-cap-frac", type=float, default=0.07257,
                    help="Max fraction of target names per side allowed to exit on non-rebal months")
-    p.add_argument("--ls-turnover-budget", type=float, default=0.30,
+    p.add_argument("--ls-turnover-budget", type=float, default=0.32496,
                    help="Target LS monthly turnover budget (fraction, e.g., 0.30). Applied on non-rebalance months if enabled.")
     try:
         from argparse import BooleanOptionalAction  # py39+
@@ -1966,6 +1972,12 @@ def make_parser() -> argparse.ArgumentParser:
     except Exception:
         p.add_argument("--use-turnover-budget", action="store_true", default=True,
                        help="Enable top-down LS turnover budget on non-rebalance months")
+    p.add_argument("--micro-add-frac", type=float, default=0.01774,
+                   help="Fraction of target names eligible for micro adds in non-rebalance months (default: %(default)s)")
+    p.add_argument("--kill-alpha-t-min", type=float, default=2.0,
+                   help="Kill rule threshold for |alpha t-stat| after costs (default: %(default)s)")
+    p.add_argument("--kill-net-sharpe-min", type=float, default=0.0,
+                   help="Kill rule threshold for LS net Sharpe after costs (default: %(default)s)")
     try:
         from argparse import BooleanOptionalAction  # py39+
         p.add_argument("--adaptive-exit-cap", action=BooleanOptionalAction, default=True,
@@ -1990,17 +2002,19 @@ def make_parser() -> argparse.ArgumentParser:
                        help="If enabled, also export cold-start files that ignore previous weights (bootstrap new accounts)")
     p.add_argument("--ramp-frac", type=float, default=None,
                    help="Ramp fraction (0..1) for cold start sizing; default = 1 / cohorts if not set")
+    p.add_argument("--out-dir", default="results",
+                   help="Directory to write results outputs (default: %(default)s)")
     return p
 
 
-if __name__ == "__main__":
-    args = make_parser().parse_args()
-    cfg = Config(
+def config_from_args(args: argparse.Namespace, *, start_date: Optional[str] = None,
+                     end_date: Optional[str] = None, out_dir: Optional[str] = None) -> Config:
+    return Config(
         db_path=args.db_path,
         cdi_path=args.cdi_path,
         liquidity_threshold=args.liquidity_threshold,
-        start_date=args.start_date,
-        end_date=args.end_date,
+        start_date=start_date if start_date is not None else args.start_date,
+        end_date=end_date if end_date is not None else args.end_date,
         nw_lags=args.nw_lags,
         min_eligible=args.min_eligible,
         bova11_ticker=args.bova11_ticker,
@@ -2027,5 +2041,13 @@ if __name__ == "__main__":
         write_state_snapshots=args.write_state_snapshots,
         cold_start=getattr(args, "cold_start", False),
         ramp_frac=args.ramp_frac,
+        out_dir=out_dir if out_dir is not None else getattr(args, "out_dir", "results"),
+        kill_alpha_t_min=args.kill_alpha_t_min,
+        kill_net_sharpe_min=args.kill_net_sharpe_min,
     )
+
+
+if __name__ == "__main__":
+    args = make_parser().parse_args()
+    cfg = config_from_args(args)
     run_analysis(cfg)

@@ -3,11 +3,13 @@
 
 ## Executive Summary
 - Sector-neutral 12-2 month momentum across Brazilian equities, implemented as a three-cohort long/short portfolio with systematic guardrails, beta overlay, and 10% volatility targeting.
-- Backtest (Jan 2011 - Aug 2025, 176 months) delivers 13.3% annualised return at 10.0% realised volatility, Sharpe 0.39 vs CDI, and 112 bps/month CAPM alpha versus IBOV (t = 4.82) with residual beta of -0.06.
-- Strategy holds roughly 55-60 names per side (min 30, max 88) with 34.8% average monthly turnover, split 26.9% reconstitution and 7.9% reweights, aided by banded maintenance and a turnover budget.
-- Risk controls include sector neutrality, single-name caps, adaptive exit bands, a composite beta overlay (average hedge ratio 10%) and volatility scaling (average multiplier 1.04, active 94% of months).
-- Drawdown discipline: worst peak-to-trough loss of -12.5% (Jul 2016), 67.6% positive months, and -0.13 correlation to IBOV; long-only top-decile sleeve compounds at 14.5% but with 25% volatility and beta near 1.
-- Net-of-cost stress test: assuming 20 / 50 / 100 bps round-trip costs per month, annualised returns remain 13.4% / 12.7% / 11.5% with information ratios 1.31 / 1.25 / 1.14, highlighting robustness to execution friction.
+- Backtest (Jan 2011 - Aug 2025, 176 months) delivers ≈12.5% annualised return at ~10% realised volatility, Sharpe ≈0.37 vs CDI, and 103 bps/month CAPM alpha versus IBOV (t ≈ 4.21) with residual beta around -0.05.
+- Strategy holds roughly 55-60 names per side (min 30, max 88) with ~35.9% average monthly turnover, split ~27.9% reconstitution and 8.0% reweights, aided by banded maintenance and a turnover budget.
+- Risk controls include sector neutrality, single-name caps, adaptive exit bands, a composite beta overlay (average hedge ratio ≈10%) and volatility scaling (average multiplier 1.04, active 94% of months).
+- Drawdown discipline: worst peak-to-trough loss of -13.7%, 66.7% positive months, and -0.12 correlation to IBOV; long-only top-decile sleeve compounds at ~13% but with 25% volatility and beta near 1.
+- Net-of-cost stress test: assuming 20 / 50 / 100 bps round-trip costs per month, annualised returns remain ≈13.0% / 12.3% / 11.2% with information ratios 1.21 / 1.15 / 1.04, highlighting robustness to execution friction.
+
+> **Update (Run 05 combined defaults, Oct-2025 rerun)**: LS momentum delivers ≈12.5%/yr at ~10% vol with 102.5 bps/mo CAPM alpha (t≈4.21, β≈-0.05) and -13.7% max drawdown; value sleeve delivers 96.8 bps/mo alpha (t≈5.08) at 27.7% turnover. The equal-weight combined LS sleeve prints ≈12.5%/yr at 6.8% vol with 102 bps/mo alpha (t≈7.18), 71% hit rate, and -5.3% max drawdown. See `results/combined_default_summary.md` for full metrics and equity curve.
 
 ## Strategy Blueprint
 ### Universe & Data Hygiene
@@ -24,13 +26,13 @@
 ### Portfolio Construction
 - Long/short sleeves sized to 50% gross per side (~100% gross, 0% net before overlay), selecting equal-weighted names within the target deciles.
 - Three staggered cohorts rebalance quarterly on a rolling basis (one cohort each month) to reduce turnover drift while maintaining monthly composite updates.
-- Banded maintenance: keep longs while percentile >= 80 and shorts <= 20; adds only when percentile >= 90 or <= 10, respectively.
+- Banded maintenance: keep longs while percentile ≥ 81.4 and shorts ≤ 18.6; adds only when percentile ≥ 90.3 or ≤ 9.7, respectively.
 - Exposure guardrails:
   - Single-name max weight = min(2x equal weight, 2.5%), floor = 25% of equal weight.
-  - Sector drift constrained to +/-10 percentage points per side relative to equal-weight sector share.
+  - Sector drift constrained to +/-9.2 percentage points per side relative to equal-weight sector share.
   - Side gross tolerance +/-2 percentage points around 50% triggered only when breached.
-  - Adaptive exit caps on non-rebalance months: base 5% of book with adjustments for signal dispersion and reversal regime.
-  - Turnover budget of 30% monthly enforced via severity queue before emergency overrides.
+  - Adaptive exit caps on non-rebalance months: baseline 7.3% of book with adjustments for signal dispersion and reversal regime.
+  - Turnover budget of 32% monthly enforced via severity queue before emergency overrides; micro-adds capped near 1.8% of names.
 
 ### Rebalance & Trade Workflow
 - Calendar: determine exchange month-ends from trading calendar, trade on following business day (T+1), hold to next cohort event; live mode detects partial months and defers.
@@ -40,7 +42,7 @@
 ## Risk Management Architecture
 ### Composite Beta Overlay
 - Rolling 36-month lookback with 60 trading day EWMA halflife and 50% shrinkage estimates composite beta.
-- Hedge ratio adjusts when |beta_hat| > 0.10 band; average realised hedge ratio +10%, range -14.8% to +35.9%.
+- Hedge ratio adjusts when |beta_hat| > 0.113 band; average realised hedge ratio +10%, range -14.8% to +35.9%.
 - Overlay reduces raw beta from -0.16 pre-overlay to -0.06 post-overlay and improves CAPM alpha from 104 bps/month (t = 4.56) to 112 bps/month (t = 4.82).
 
 ### Volatility Targeting
@@ -82,7 +84,7 @@
 - LS composite captures 92% of long-only alpha with 40% of the volatility and near-zero market exposure.
 
 ### Turnover & Capacity
-- Average monthly LS turnover 34.8%, with 77% attributable to reconstitutions (new entrants/exits) and 23% to reweights; exit caps limit non-event churn to <=5% of book unless dispersion spikes.
+- Average monthly LS turnover 35.9%, with ~78% attributable to reconstitutions and 22% to reweights; exit caps limit non-event churn to <=7.3% of book unless dispersion spikes.
 - Average holdings: 56 longs / 54 shorts; cohorting ensures minimum 30 names per side, peaking at 88 when breadth is high.
 - Liquidity buffer: median cohort name trades at least 15x expected dollar turnover (per px_ref_open and liquidity threshold), supporting institutional lot sizes.
 

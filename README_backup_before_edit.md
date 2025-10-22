@@ -69,19 +69,20 @@ Cohorts and staggering
 - Composite return equals the average of cohort returns; composite turnover is the average of cohort turnovers.
 
 Banded rebalancing (inside each cohort)
-- Keep bands: Long keep if percentile ≥ 80th; Short keep if ≤ 20th.
-- Add bands: Long add if ≥ 90th and not in cohort; Short add if ≤ 10th and not in cohort.
+- Keep bands: Long keep if percentile ≥ 81.4th; Short keep if ≤ 18.6th.
+- Add bands: Long add if ≥ 90.3rd and not in cohort; Short add if ≤ 9.7th and not in cohort.
 - Non‑rebalance months: process exits only; defer adds to cohort’s next full rebalance.
 
 Guardrails (to limit drift and trading)
 - Side gross tolerance: enforce 0.50 ± 2% only when outside band.
 - Single‑name cap/floor per side: cap = min(2× equal, 2.5%), floor = 0.25× equal.
-- Sector drift nudge: within side, keep sector shares within ±10pp of equal‑by‑sector; apply small pro‑rata nudge when breached.
-- Exit cap (non‑rebalance): at most 5% of target names per side may exit per month; others are carried.
+- Sector drift nudge: within side, keep sector shares within ±9.2pp of equal-by-sector; apply small pro-rata nudge when breached.
+- Exit cap (non-rebalance): at most 7.3% of target names per side may exit per month; others are carried.
+- Turnover budget: LS sleeves target ≈32% monthly turnover, with micro-adds capped around 1.8% of names.
 - Concentration emergency: one‑off equalize when effective N < 70% of target or > 20% at floor.
 
 Composite overlay and vol targeting (ordering matters)
-- Overlay: composite LS beta vs IBOV from EWMA (≈60 trading days), 50% shrink toward 0, ±0.10 band; applied first.
+- Overlay: composite LS beta vs IBOV from EWMA (≈60 trading days), 50% shrink toward 0, ±0.113 band; applied first.
 - Vol targeting: 10% annualized volatility using 36‑month rolling vol; applied to hedged series.
 
 Timing hygiene

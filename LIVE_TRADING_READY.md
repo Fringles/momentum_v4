@@ -112,12 +112,14 @@ python3 scripts/test_live_workflow_simple.py
 
 ## 📈 Performance Profile
 
-Based on backtest (2011-present):
-- **Alpha**: 104.8 bps/month vs IBOV (t=4.57)
-- **Information Ratio**: 1.25 annualized
-- **Max Drawdown**: -16.58%
-- **Turnover**: ~35% monthly (efficient execution)
-- **Hit Rate**: 67.8%
+Based on the March 2025 rerun (2011-present data, 3 cohorts, beta overlay, 10% vol targeting):
+- **Alpha**: 94.9 bps/month vs IBOV (t=3.88)
+- **Information Ratio**: 1.15 annualized
+- **Max Drawdown**: -22.9%
+- **Turnover**: ~34.9% monthly (efficient execution)
+- **Hit Rate**: 63.8%
+
+**Delisting treatment**: any name with a valid entry price that lacks an exit price is now marked down to zero (−100% return). Expect larger single-month drawdowns when constituents disappear mid-period; this removes the survivorship bias present in earlier backtests.
 
 ## 🔧 System Architecture
 

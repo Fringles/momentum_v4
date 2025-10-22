@@ -36,6 +36,7 @@ python3 scripts/plot_momentum_br.py \
 
 A detailed write-up with current results lives at:
 - `results/momentum_strategy_report.md`
+- Combined LS (Run 05 defaults) recap: `results/combined_default_summary.md`
 
 ---
 
@@ -69,23 +70,32 @@ Cohorts and staggering
 - Composite return equals the average of cohort returns; composite turnover is the average of cohort turnovers.
 
 Banded rebalancing (inside each cohort)
-- Keep bands: Long keep if percentile ≥ 80th; Short keep if ≤ 20th.
-- Add bands: Long add if ≥ 90th and not in cohort; Short add if ≤ 10th and not in cohort.
+- Keep bands: Long keep if percentile ≥ 81.4th; Short keep if ≤ 18.6th.
+- Add bands: Long add if ≥ 90.3rd and not in cohort; Short add if ≤ 9.7th and not in cohort.
 - Non-rebalance months: process exits only; defer adds to cohort's next full rebalance.
 
 Guardrails (to limit drift and trading)
 - Side gross tolerance: enforce 0.50 ± 2% only when outside band.
 - Single-name cap/floor per side: cap = min(2× equal, 2.5%), floor = 0.25× equal.
-- Sector drift nudge: within side, keep sector shares within ±10pp of equal-by-sector; apply small pro-rata nudge when breached.
-- Exit cap (non-rebalance): at most 5% of target names per side may exit per month; others are carried.
+- Sector drift nudge: within side, keep sector shares within ±9.2pp of equal-by-sector; apply small pro-rata nudge when breached.
+- Exit cap (non-rebalance): at most 7.3% of target names per side may exit per month; others are carried.
+- Turnover budget: LS sleeves target ≈32% monthly turnover (per-side), enforced before emergency overrides; micro-adds limited to ~1.8% of names.
 - Concentration emergency: one-off equalize when effective N < 70% of target or > 20% at floor.
 
 Composite overlay and vol targeting (ordering matters)
-- Overlay: composite LS beta vs IBOV from EWMA (~60 trading days), 50% shrink toward 0, ±0.10 band; applied first.
+- Overlay: composite LS beta vs IBOV from EWMA (~60 trading days), 50% shrink toward 0, ±0.113 band; applied first.
 - Vol targeting: 10% annualized volatility using 36-month rolling vol; applied to hedged series.
 
 Timing hygiene
 - Portfolios are formed at calendar month-end using data through t, traded at next day's open (T+1), and held to next T+1 open.
+
+### Delistings & Missing Exit Prices
+
+- Effective March 2025 both `scripts/momentum_br.py` and `scripts/value_br.py` treat any constituent with a valid trade-date open but no price at the next rebalance open as a full write-off (`-100%` return). The engine reindexes the holding-period end prices to the trade-date universe and sets those missing entries to `0.0` before computing returns.
+- Names that never traded on the entry date (missing start open) are still excluded, matching prior behaviour for thinly traded tickers.
+- This closes a survivorship bias hole where delisted names were previously dropped from the return vector. Expect lower backtest performance and deeper drawdowns: the latest momentum rerun (through Oct-2025 data, 3 cohorts, beta overlay, 10% vol targeting) delivers LS alpha ≈ 95 bps/month (t≈3.9) and D10 mean ≈ 105 bps/month (t≈2.2). The matched value rerun shows LS alpha ≈ 68 bps/month (t≈4.4).
+- Large single-month hits now appear whenever a portfolio member vanishes mid-period (e.g., SQIA3 in Oct-2023, CLSA3 plus ELMD3/JBSS3 in mid-2025). That is the intended conservative treatment; verify monthly logs if an unexpectedly big draw surfaces.
+- For a detailed after-action report, see `delisting_handling.md`.
 
 ---
 
