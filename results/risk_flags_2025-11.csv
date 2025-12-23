@@ -1,0 +1,7 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2025-11-28,2025-12-01,CPLE6,3,0.25,halt_run|thin_trading|zero_volume_streak,7,14,146080941.0,128515238.0,14
+2025-11-28,2025-12-01,ELET3,3,0.25,halt_run|thin_trading|zero_volume_streak,4,17,329207570.5,307704106.0,17
+2025-11-28,2025-12-01,EMBR3,3,0.25,halt_run|thin_trading|zero_volume_streak,2,19,431089423.0,357774275.5,19
+2025-11-28,2025-12-01,PORT3,1,0.75,liquidity_slump,21,0,2743507.0,6907541.0,0
+2025-11-28,2025-12-01,SRNA3,3,0.25,halt_run|thin_trading|zero_volume_streak,11,10,19806713.0,34642290.0,10
+2025-11-28,2025-12-01,STBP3,4,0.25,halt_run|no_recent_volume|thin_trading|zero_volume_streak,0,21,,65012692.0,21

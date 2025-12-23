@@ -29,13 +29,13 @@
 - Outputs: `results/combined_default/combined_timeseries.csv`, `combined_equity_curve.png`.
 
 ## Combined LS Performance (2011-01 – 2025-09, 177 months)
-- Mean monthly return: **0.987%** (t = 6.69)
-- Annualised return: **12.52%**
-- Annualised volatility: **6.80%**
-- CAPM alpha vs IBOV: **102.3 bps/month** (t = 7.18), β = −0.056
-- Hit rate: **71.2%** positive months
-- Max drawdown: **−5.3%**
-- Cost grid (combined, 50 bps RT implied via individual sleeves): net alpha ≈ 100 bps/month (momentum) + 90–97 bps/month (value); blended alpha ≈ 96 bps/month with drawdown near −6%.
+- Mean monthly return: **0.886%** (t ≈ 6.76)
+- Annualised return: **11.17%**
+- Annualised volatility: **6.25%**
+- CAPM alpha vs IBOV: **87 bps/month** (t ≈ 6.74), β ≈ **+0.02**
+- Hit rate: **67.8%** positive months
+- Max drawdown: **−5.6%**
+- Cost grid (combined, 50 bps RT implied via individual sleeves): net alpha ≈ 83–90 bps/month once sleeve trading costs are reflected; blended drawdown remains around −6%.
 - Equity curve plot saved at `results/combined_default/combined_equity_curve.png` (see below).
 
 ### Momentum Sleeve (Run 05 parameters)

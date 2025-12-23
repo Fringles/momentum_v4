@@ -1,0 +1,2 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2016-08-31,2016-09-01,OIBR3,1,0.75,liquidity_slump,21,0,4718404.0,18561006.0,0

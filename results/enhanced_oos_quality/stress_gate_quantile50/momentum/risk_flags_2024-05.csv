@@ -1,0 +1,2 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2024-05-31,2024-06-03,SEQL3,1,0.75,liquidity_slump,21,0,1006519.0,2136951.0,0

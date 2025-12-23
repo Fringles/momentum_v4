@@ -1,0 +1,5 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2018-07-31,2018-08-01,CGAS5,1,0.75,liquidity_slump,21,0,1464949.0,2722849.0,0
+2018-07-31,2018-08-01,ELPL3,1,0.75,liquidity_slump,21,0,3263583.0,8250943.0,0
+2018-07-31,2018-08-01,SAPR11,1,0.75,liquidity_slump,21,0,7234242.0,16110098.0,0
+2018-07-31,2018-08-01,WIZC3,1,0.75,liquidity_slump,21,0,2425064.0,4913523.0,0

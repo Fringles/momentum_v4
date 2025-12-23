@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+from statistics import NormalDist
 
 from momentum_br import (
     Config as MomConfig,
@@ -48,7 +49,7 @@ def parse_args() -> Tuple[argparse.Namespace, argparse.Namespace, argparse.Names
     parser.add_argument("--cv-end", default="2018-12-31")
     parser.add_argument("--oos-start-date", default="2019-01-01")
     parser.add_argument("--oos-end-date", default=None)
-    parser.add_argument("--oos-report-start", default="2020-01-01",
+    parser.add_argument("--oos-report-start", default="2019-01-01",
                         help="Start date for reporting headline OOS metrics (kill rule still uses full OOS window).")
     parser.add_argument("--samples", type=int, default=20)
     parser.add_argument("--seed", type=int, default=123)
@@ -104,6 +105,8 @@ def compute_basic_metrics(series: pd.Series) -> Dict[str, Any]:
             "sharpe": math.nan,
             "max_drawdown": math.nan,
             "hit_rate": math.nan,
+            "skew": math.nan,
+            "kurt": math.nan,
         }
     years = months / 12.0
     mean = float(s.mean())
@@ -127,14 +130,135 @@ def compute_basic_metrics(series: pd.Series) -> Dict[str, Any]:
         "sharpe": sharpe,
         "max_drawdown": max_dd,
         "hit_rate": hit_rate,
+        "skew": float(s.skew()) if months > 0 else math.nan,
+        "kurt": float(s.kurtosis()) if months > 0 else math.nan,
     }
 
 
+def concat_timeseries(train: pd.DataFrame, oos: pd.DataFrame) -> pd.DataFrame:
+    combined = pd.concat([train, oos]).sort_index()
+    return combined[~combined.index.duplicated(keep="last")]
+
+
+def build_combined_series(mom_df: pd.DataFrame, val_df: pd.DataFrame) -> pd.DataFrame:
+    idx = mom_df.index.union(val_df.index)
+    mom_col = "LS_net" if "LS_net" in mom_df.columns else "LS"
+    val_col = "LS_net" if "LS_net" in val_df.columns else "LS"
+    mom_ret = mom_df.get(mom_col, pd.Series(dtype=float)).reindex(idx)
+    val_ret = val_df.get(val_col, pd.Series(dtype=float)).reindex(idx)
+    cdi = mom_df.get("CDI", pd.Series(dtype=float)).reindex(idx)
+    if "CDI" in val_df.columns:
+        cdi = cdi.where(~cdi.isna(), val_df["CDI"].reindex(idx))
+    combo = 0.5 * (mom_ret + val_ret)
+    df = pd.DataFrame({
+        "combo": combo,
+        "mom": mom_ret,
+        "val": val_ret,
+        "cdi": cdi,
+    }).dropna(subset=["combo"])
+    return df
+
+
+def compute_series_stats(series: pd.Series, rf: Optional[pd.Series] = None) -> Dict[str, Any]:
+    s = series.dropna()
+    months = len(s)
+    if months == 0:
+        return {
+            "months": 0,
+            "mean": math.nan,
+            "cagr": math.nan,
+            "vol": math.nan,
+            "sharpe": math.nan,
+            "sharpe_excess": math.nan,
+            "hit": math.nan,
+            "max_dd": math.nan,
+            "skew": math.nan,
+            "kurt": math.nan,
+        }
+    years = months / 12.0
+    cum = float((1.0 + s).prod())
+    cagr = cum ** (1.0 / years) - 1.0 if years > 0 else math.nan
+    vol = float(s.std(ddof=0) * math.sqrt(12.0)) if months > 1 else math.nan
+    mean = float(s.mean())
+    sharpe = mean / s.std(ddof=0) * math.sqrt(12.0) if months > 1 and s.std(ddof=0) > 0 else math.nan
+    if rf is not None:
+        rf_aligned = rf.reindex(s.index).fillna(0.0)
+        excess = (s - rf_aligned).dropna()
+        sharpe_ex = excess.mean() / excess.std(ddof=0) * math.sqrt(12.0) if len(excess) > 1 and excess.std(ddof=0) > 0 else math.nan
+    else:
+        sharpe_ex = math.nan
+    wealth = (1.0 + s.fillna(0.0)).cumprod()
+    drawdown = wealth / wealth.cummax() - 1.0
+    stats = {
+        "months": months,
+        "mean": mean,
+        "cagr": cagr,
+        "vol": vol,
+        "sharpe": sharpe,
+        "sharpe_excess": sharpe_ex,
+        "hit": float((s > 0).mean()),
+        "max_dd": float(drawdown.min()),
+        "skew": float(s.skew()),
+        "kurt": float(s.kurtosis()),
+    }
+    return stats
+
+
+def compute_deflated_sharpe(metric: Dict[str, Any], trials: int) -> float:
+    sharpe = metric.get("sharpe_excess")
+    if sharpe is None or not np.isfinite(sharpe):
+        sharpe = metric.get("sharpe")
+    skew = metric.get("skew")
+    kurt = metric.get("kurt")
+    n = metric.get("months", 0)
+    if not (np.isfinite(sharpe) and np.isfinite(skew) and np.isfinite(kurt)) or n <= 1:
+        return math.nan
+    numerator = sharpe * math.sqrt(max(n - 1, 1))
+    denom_term = 1 - skew * sharpe + ((kurt - 1) / 4.0) * (sharpe ** 2)
+    if denom_term <= 0:
+        return math.nan
+    sr_adj = numerator / math.sqrt(denom_term)
+    alpha = 0.05
+    dist = NormalDist()
+    z_alpha = dist.inv_cdf(1 - alpha / max(2 * trials, 2))
+    return sr_adj - z_alpha
+
+
+def compute_walk_forward(series_df: pd.DataFrame, start_year: int, end_year: int) -> List[Dict[str, Any]]:
+    results: List[Dict[str, Any]] = []
+    for year in range(start_year, end_year + 1):
+        train_mask = series_df.index.year < year
+        test_mask = series_df.index.year == year
+        if not train_mask.any() or not test_mask.any():
+            continue
+        train = series_df.loc[train_mask]
+        test = series_df.loc[test_mask]
+        if train.empty or test.empty:
+            continue
+        train_stats = compute_series_stats(train["combo"], train.get("cdi"))
+        test_stats = compute_series_stats(test["combo"], test.get("cdi"))
+        results.append(
+            {
+                "test_year": year,
+                "train_months": train_stats["months"],
+                "train_cagr": train_stats["cagr"],
+                "train_sharpe": train_stats["sharpe_excess"],
+                "test_months": test_stats["months"],
+                "test_cagr": test_stats["cagr"],
+                "test_sharpe": test_stats["sharpe_excess"],
+                "test_hit": test_stats["hit"],
+                "test_max_dd": test_stats["max_dd"],
+            }
+        )
+    return results
+
+
 def compute_cost_metrics(df: pd.DataFrame, cost_bps: float, lags: int) -> Dict[str, Any]:
-    if "LS" not in df or "turnover_LS" not in df:
+    base_col = "LS_net" if "LS_net" in df.columns else "LS"
+    if base_col not in df or "turnover_LS" not in df:
         return {}
     per_side_rate = (cost_bps / 10000.0) / 2.0
-    net = df["LS"].astype(float) - per_side_rate * df["turnover_LS"].astype(float)
+    net = df[base_col].astype(float) - per_side_rate * df["turnover_LS"].astype(float)
     metrics = compute_basic_metrics(net)
     bm = df.get("BOVA11", pd.Series(dtype=float))
     joined = pd.concat([net, bm], axis=1).dropna()
@@ -172,19 +296,47 @@ def evaluate_combined(
         end_ts = pd.to_datetime(end)
         m = m[m.index <= end_ts]
         v = v[v.index <= end_ts]
+    mom_return_col = "LS_net" if "LS_net" in m.columns else "LS"
+    val_return_col = "LS_net" if "LS_net" in v.columns else "LS"
     join = pd.concat(
-        [m["LS"], m.get("turnover_LS"), m.get("BOVA11"), v["LS"], v.get("turnover_LS")],
+        [
+            m[mom_return_col],
+            m.get("turnover_LS"),
+            m.get("BOVA11"),
+            v[val_return_col],
+            v.get("turnover_LS"),
+            m.get("LS_carry"),
+            m.get("LS_borrow_cost"),
+            v.get("LS_carry"),
+            v.get("LS_borrow_cost"),
+        ],
         axis=1,
-        keys=["mom_return", "mom_turnover", "BOVA11", "val_return", "val_turnover"],
-    ).dropna()
+        keys=[
+            "mom_return",
+            "mom_turnover",
+            "BOVA11",
+            "val_return",
+            "val_turnover",
+            "mom_carry",
+            "mom_borrow",
+            "val_carry",
+            "val_borrow",
+        ],
+    ).dropna(subset=["mom_return", "val_return"])
     if join.empty:
         return {
             "combined": {"raw": compute_basic_metrics(pd.Series(dtype=float)), "cost": {}, "avg_turnover": math.nan},
             "momentum": {"raw": {}, "cost": {}},
             "value": {"raw": {}, "cost": {}},
         }
+    for col in ["mom_turnover", "val_turnover", "mom_carry", "mom_borrow", "val_carry", "val_borrow"]:
+        if col in join.columns:
+            join[col] = join[col].fillna(0.0)
     join["combined_return"] = 0.5 * (join["mom_return"] + join["val_return"])
-    join["combined_turnover"] = 0.5 * (join["mom_turnover"].fillna(0.0) + join["val_turnover"].fillna(0.0))
+    join["combined_turnover"] = 0.5 * (join["mom_turnover"] + join["val_turnover"])
+    join["combined_carry"] = 0.5 * (join.get("mom_carry", 0.0) + join.get("val_carry", 0.0))
+    join["combined_borrow"] = 0.5 * (join.get("mom_borrow", 0.0) + join.get("val_borrow", 0.0))
+    join["combined_financing"] = join["combined_carry"] - join["combined_borrow"]
     per_side_rate = (cost_bps / 10000.0) / 2.0
     join["mom_net"] = join["mom_return"] - per_side_rate * join["mom_turnover"]
     join["val_net"] = join["val_return"] - per_side_rate * join["val_turnover"]
@@ -425,6 +577,25 @@ def main() -> None:
                     50.0,
                 ),
             }
+            train_mom_df = load_timeseries(os.path.join(entry["dirs"]["train_momentum"], "momentum_br_timeseries.csv"))
+            train_val_df = load_timeseries(os.path.join(entry["dirs"]["train_value"], "value_br_timeseries.csv"))
+            full_mom_df = concat_timeseries(train_mom_df, mom_df)
+            full_val_df = concat_timeseries(train_val_df, val_df)
+            full_series = build_combined_series(full_mom_df, full_val_df)
+            oos_series = build_combined_series(mom_df, val_df)
+            oos_2019_series = full_series.loc[full_series.index >= pd.to_datetime("2019-01-01")]
+            analytics = {
+                "full": compute_series_stats(full_series["combo"], full_series.get("cdi")),
+                "oos_full": compute_series_stats(oos_series["combo"], oos_series.get("cdi")),
+                "oos_2019_plus": compute_series_stats(oos_2019_series["combo"], oos_2019_series.get("cdi")) if not oos_2019_series.empty else compute_series_stats(pd.Series(dtype=float)),
+            }
+            analytics["deflated_sharpe"] = compute_deflated_sharpe(analytics["full"], tuning_args.samples)
+            start_year = max(full_series.index.min().year + 1, 2016) if not full_series.empty else 2016
+            analytics["walk_forward"] = compute_walk_forward(full_series, start_year, full_series.index.max().year if not full_series.empty else start_year)
+            entry["analytics"] = analytics
+            combined_ts_path = os.path.join(run_root, run_id, "combined_train_oos_timeseries.csv")
+            full_series.reset_index().to_csv(combined_ts_path, index=False)
+            entry["dirs"]["combined_series"] = combined_ts_path
         entry["dirs"]["oos_momentum"] = oos_mom_dir
         entry["dirs"]["oos_value"] = oos_val_dir
 
@@ -447,6 +618,18 @@ def main() -> None:
             "train_sharpe": train_combined["cost"].get("sharpe"),
             "constraints_pass": r.get("train_constraints_pass"),
         }
+        analytics = r.get("analytics", {})
+        full_stats = analytics.get("full", {})
+        oos2019_stats = analytics.get("oos_2019_plus", {})
+        row.update(
+            {
+                "full_sharpe_excess": full_stats.get("sharpe_excess"),
+                "full_cagr": full_stats.get("cagr"),
+                "full_deflated_sharpe": analytics.get("deflated_sharpe"),
+                "oos2019_sharpe": oos2019_stats.get("sharpe_excess"),
+                "oos2019_cagr": oos2019_stats.get("cagr"),
+            }
+        )
         if "oos" in r:
             oos_report = r["oos"]["report"]["combined"]
             row.update(

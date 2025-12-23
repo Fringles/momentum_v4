@@ -1,0 +1,4 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2015-06-30,2015-07-01,CZLT33,1,0.75,liquidity_slump,21,0,1171781.0,2324440.0,0
+2015-06-30,2015-07-01,HBOR3,1,0.75,liquidity_slump,21,0,1143314.0,2023001.0,0
+2015-06-30,2015-07-01,RSID3,1,0.75,liquidity_slump,21,0,1328549.0,2040624.0,0

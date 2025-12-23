@@ -1,0 +1,2 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2011-09-30,2011-10-03,RPMG3,1,0.75,liquidity_slump,21,0,2685410.0,7108732.0,0

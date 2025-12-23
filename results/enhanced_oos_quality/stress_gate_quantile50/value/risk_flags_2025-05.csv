@@ -1,0 +1,4 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2025-05-30,2025-06-02,AMOB3,1,0.75,liquidity_slump,21,0,1444184.0,2178319.0,0
+2025-05-30,2025-06-02,BHIA3,1,0.75,liquidity_slump,21,0,9935373.0,30676561.0,0
+2025-05-30,2025-06-02,ELMD3,1,0.75,liquidity_slump,21,0,487234.0,3408036.0,0

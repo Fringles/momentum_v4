@@ -1,0 +1,4 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2015-07-31,2015-08-03,ABCB4,1,0.75,liquidity_slump,21,0,1482727.0,2295127.0,0
+2015-07-31,2015-08-03,ARTR3,1,0.75,liquidity_slump,21,0,1437001.0,2258168.0,0
+2015-07-31,2015-08-03,DAGB33,1,0.75,liquidity_slump,21,0,2475781.0,5967394.0,0

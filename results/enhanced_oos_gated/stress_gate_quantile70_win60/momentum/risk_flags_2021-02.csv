@@ -1,0 +1,4 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2021-02-26,2021-03-01,DMMO3,1,0.75,liquidity_slump,21,0,6667110.0,15233479.0,0
+2021-02-26,2021-03-01,ETER3,1,0.75,liquidity_slump,21,0,14405563.0,38071032.0,0
+2021-02-26,2021-03-01,RCSL4,1,0.75,liquidity_slump,21,0,2102181.0,6036601.0,0

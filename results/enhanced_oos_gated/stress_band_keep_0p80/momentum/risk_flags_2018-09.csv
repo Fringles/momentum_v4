@@ -1,0 +1,2 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2018-09-28,2018-10-01,FHER3,1,0.75,liquidity_slump,21,0,1083264.0,2789076.0,0

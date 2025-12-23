@@ -33,7 +33,7 @@
   python scripts/export_daily_prices.py --apply-overlay --results-dir results --db-path "G:\My Drive\mel-database\financial_data.db" --cdi-path "G:\My Drive\mel-database\cdi_series.xlsx"
   ```
 - Execute the LS orders on the published trade date, then hold the book until the following `next_trade_date`; the staggered cohorts are already encoded in the files.
-- Adjust the BOVA11 overlay on the same trade date using `hedge_ratio * live_capital` from the latest exports; if the ratio stays inside the 0.10 band, keep the prior hedge.
+- Adjust the BOVA11 overlay on the same trade date using `combo_hedge_ratio * live_capital` from `results/combined_timeseries.csv` (or the relevant scenario folder); if the ratio stays inside the 0.10 band, keep the prior hedge.
 - Vol targeting is embedded in the weights and orders, so after fills just verify gross long and short notionals sit near 51% of capital per side and that net beta is neutral.
 - After execution, log the fills and reconcile versus the exported `account_targets_YYYY-MM.csv` to confirm alignment.
 

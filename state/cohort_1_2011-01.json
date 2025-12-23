@@ -3,67 +3,216 @@
   "trade_date": "2011-02-01",
   "cohort_id": 1,
   "weights_ls": {
-    "ABEV3": 0.05,
-    "CNFB4": 0.05,
-    "EGIE3": 0.05,
-    "EZTC3": 0.05,
-    "GETI3": 0.05,
-    "LPSB3": 0.05,
-    "ODPV3": 0.05,
-    "POMO4": 0.05,
-    "RPMG3": 0.05,
-    "TOTS3": 0.05,
-    "AMER3": -0.05,
-    "BPAN4": -0.05,
-    "ELET3": -0.05,
-    "GPIV33": -0.05,
-    "LAND3": -0.05,
-    "MAGG3": -0.05,
-    "MILK33": -0.05,
-    "PETR4": -0.05,
-    "UNIP6": -0.05,
-    "VIVR3": -0.05
+    "AMER3": 0.08333333333333333,
+    "ARTR3": 0.08333333333333333,
+    "BRML3": 0.08333333333333333,
+    "CSMG3": 0.08333333333333333,
+    "LIGT3": 0.08333333333333333,
+    "RPMG3": 0.08333333333333333,
+    "BRFS3": -0.0625,
+    "BRPR3": -0.0625,
+    "CPFE3": -0.0625,
+    "LUPA3": -0.0625,
+    "ODPV3": -0.0625,
+    "PDGR3": -0.0625,
+    "TOTS3": -0.0625,
+    "VIVR3": -0.0625
   },
   "weights_d10": {
-    "ABEV3": 0.1,
-    "CNFB4": 0.1,
-    "EGIE3": 0.1,
-    "EZTC3": 0.1,
-    "GETI3": 0.1,
-    "LPSB3": 0.1,
-    "ODPV3": 0.1,
-    "POMO4": 0.1,
-    "RPMG3": 0.1,
-    "TOTS3": 0.1
+    "AMER3": 0.11428571428571427,
+    "ARTR3": 0.11428571428571427,
+    "BRML3": 0.11428571428571427,
+    "CSMG3": 0.11428571428571427,
+    "EMBR3": 0.11428571428571427,
+    "EQTL3": 0.0857142857142857,
+    "GPIV33": 0.11428571428571427,
+    "LIGT3": 0.11428571428571427,
+    "RPMG3": 0.11428571428571427
   },
   "dur_long": {
-    "POMO4": 1,
-    "RPMG3": 1,
-    "EZTC3": 1,
-    "ODPV3": 1,
-    "ABEV3": 1,
-    "LPSB3": 1,
-    "EGIE3": 1,
-    "TOTS3": 1,
-    "GETI3": 1,
-    "CNFB4": 1
+    "ARTR3": 8,
+    "BRML3": 8,
+    "LIGT3": 3,
+    "RPMG3": 3,
+    "AMER3": 8,
+    "CSMG3": 6
   },
   "dur_short": {
-    "GPIV33": 1,
-    "ELET3": 1,
-    "MILK33": 1,
-    "MAGG3": 1,
-    "VIVR3": 1,
-    "UNIP6": 1,
-    "BPAN4": 1,
-    "PETR4": 1,
-    "LAND3": 1,
-    "AMER3": 1
+    "BRFS3": 8,
+    "PDGR3": 6,
+    "CPFE3": 8,
+    "BRPR3": 3,
+    "TOTS3": 8,
+    "ODPV3": 3,
+    "LUPA3": 8,
+    "VIVR3": 3
   },
   "strikes_long": {},
   "strikes_short": {},
   "ls_target_counts": {
     "long": 0,
     "short": 0
+  },
+  "delist_risk": {
+    "CPFE3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 13082527.0,
+      "long_median_volume": 10119850.0,
+      "zero_volume_days": 0
+    },
+    "BRPR3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 6190028.0,
+      "long_median_volume": 7417784.0,
+      "zero_volume_days": 0
+    },
+    "ARTR3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 4436290.0,
+      "long_median_volume": 4436290.0,
+      "zero_volume_days": 0
+    },
+    "BRML3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 28178901.0,
+      "long_median_volume": 29955675.0,
+      "zero_volume_days": 0
+    },
+    "ODPV3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 7411750.0,
+      "long_median_volume": 8314104.0,
+      "zero_volume_days": 0
+    },
+    "AMER3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 14189618.0,
+      "long_median_volume": 15276277.0,
+      "zero_volume_days": 0
+    },
+    "CSMG3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 5523837.0,
+      "long_median_volume": 4838818.0,
+      "zero_volume_days": 0
+    },
+    "EMBR3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 20101016.0,
+      "long_median_volume": 16268232.0,
+      "zero_volume_days": 0
+    },
+    "BRFS3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 64414525.0,
+      "long_median_volume": 50203356.0,
+      "zero_volume_days": 0
+    },
+    "PDGR3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 92469199.0,
+      "long_median_volume": 91448118.0,
+      "zero_volume_days": 0
+    },
+    "EQTL3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0
+    },
+    "TOTS3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 9759098.0,
+      "long_median_volume": 14168207.0,
+      "zero_volume_days": 0
+    },
+    "LIGT3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 23841670.0,
+      "long_median_volume": 18603353.0,
+      "zero_volume_days": 0
+    },
+    "RPMG3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 2414590.0,
+      "long_median_volume": 2759833.0,
+      "zero_volume_days": 0
+    },
+    "LUPA3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 2807021.0,
+      "long_median_volume": 2910712.0,
+      "zero_volume_days": 0
+    },
+    "GPIV33": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0
+    },
+    "VIVR3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 1703962.0,
+      "long_median_volume": 2090821.0,
+      "zero_volume_days": 0
+    }
   }
 }

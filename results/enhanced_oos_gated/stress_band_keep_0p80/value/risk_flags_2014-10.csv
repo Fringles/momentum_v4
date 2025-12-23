@@ -1,0 +1,3 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2014-10-31,2014-11-03,AMAR3,1,0.75,liquidity_slump,21,0,1405032.0,2386576.0,0
+2014-10-31,2014-11-03,ENEV3,1,0.75,liquidity_slump,21,0,1093812.0,2064661.0,0

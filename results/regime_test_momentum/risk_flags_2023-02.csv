@@ -1,0 +1,4 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2023-02-28,2023-03-01,AMER3,1,0.75,liquidity_slump,21,0,113310273.0,250314766.0,0
+2023-02-28,2023-03-01,LAVV3,1,0.75,liquidity_slump,21,0,1408902.0,2427986.0,0
+2023-02-28,2023-03-01,MEAL3,1,0.75,liquidity_slump,21,0,1391840.0,2473940.0,0

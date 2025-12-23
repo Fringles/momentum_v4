@@ -1,0 +1,16 @@
+{
+  "weight_dispersion": 0.2,
+  "weight_vol": 0.3,
+  "weight_macro": 0.5,
+  "scale_sensitivity": 0.1,
+  "apply_to": "gross",
+  "min_scale": 0.75,
+  "max_scale": 1.25,
+  "smoothing_months": 3,
+  "dispersion_window": 24,
+  "zscore_window": 18,
+  "vol_short_window": 3,
+  "vol_long_window": 12,
+  "cdi_short_window": 3,
+  "cdi_long_window": 12
+}

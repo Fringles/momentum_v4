@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import json
 import os
 import sqlite3
 from dataclasses import dataclass
@@ -7,7 +8,14 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-import json
+
+from delist_risk import (
+    DelistRiskConfig,
+    compute_delisting_risk,
+    summarize_universe,
+    summarize_weight_exposure,
+)
+from regime_scaler import compute_regime_scaler, load_regime_scaler_config
 
 
 @dataclass
@@ -57,6 +65,242 @@ class Config:
     cold_start: bool = False
     ramp_frac: Optional[float] = None
     out_dir: str = "results"
+    short_cash_carry_multiplier: float = 1.0
+    short_borrow_cost_annual: float = 0.08
+    dispersion_gate: Optional[str] = None
+    dispersion_gate_window: Optional[int] = None
+    regime_scaler: Optional[str] = None
+
+
+RISK_CONFIG = DelistRiskConfig()
+
+# Equal-weight composite between momentum and value sleeves unless overridden.
+SLEEVE_WEIGHTS: Dict[str, float] = {
+    "momentum": 0.5,
+    "value": 0.5,
+}
+
+
+def _join_sleeves(values: pd.Series) -> str:
+    sleeves: List[str] = []
+    for val in values.dropna():
+        for part in str(val).split(';'):
+            part = part.strip()
+            if part and part not in sleeves:
+                sleeves.append(part)
+    return ';'.join(sleeves)
+
+
+def _aggregate_detail(
+    detail_df: pd.DataFrame,
+    *,
+    key_cols: List[str],
+    sum_cols: List[str],
+    first_cols: List[str],
+    sleeve_col: str = "sleeve",
+) -> pd.DataFrame:
+    agg_dict: Dict[str, object] = {}
+    for col in sum_cols:
+        if col in detail_df.columns:
+            agg_dict[col] = "sum"
+    for col in first_cols:
+        if col in detail_df.columns:
+            agg_dict[col] = "first"
+    if sleeve_col in detail_df.columns:
+        agg_dict[sleeve_col] = _join_sleeves
+    grouped = (
+        detail_df.groupby(key_cols, dropna=False)
+        .agg(agg_dict)
+        .reset_index()
+    )
+    if sleeve_col in grouped.columns:
+        grouped = grouped.rename(columns={sleeve_col: "sleeve"})
+
+    ordered_cols: List[str] = []
+    for col in key_cols:
+        if col not in ordered_cols:
+            ordered_cols.append(col)
+    if "sleeve" in grouped.columns and "sleeve" not in ordered_cols:
+        insert_pos = 2 if len(ordered_cols) >= 2 else len(ordered_cols)
+        ordered_cols.insert(insert_pos, "sleeve")
+    for col in sum_cols + first_cols:
+        if col in grouped.columns and col not in ordered_cols:
+            ordered_cols.append(col)
+    for col in grouped.columns:
+        if col not in ordered_cols:
+            ordered_cols.append(col)
+    return grouped.loc[:, ordered_cols]
+
+
+def _update_detail_and_aggregate(
+    detail_path: str,
+    aggregate_path: str,
+    new_df: pd.DataFrame,
+    *,
+    key_cols: List[str],
+    sum_cols: List[str],
+    first_cols: List[str],
+    sleeve_value: str,
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    new_df_local = new_df.copy()
+    for col in ("month_end", "trade_date"):
+        if col in new_df_local.columns:
+            new_df_local[col] = pd.to_datetime(new_df_local[col], errors="coerce").dt.strftime("%Y-%m-%d")
+    detail_cols = new_df_local.columns.tolist()
+    if os.path.exists(detail_path):
+        detail_df = pd.read_csv(detail_path)
+        if "sleeve" in detail_df.columns:
+            detail_df = detail_df[detail_df["sleeve"] != sleeve_value]
+        for col in ("month_end", "trade_date"):
+            if col in detail_df.columns:
+                detail_df[col] = pd.to_datetime(detail_df[col], errors="coerce").dt.strftime("%Y-%m-%d")
+    else:
+        detail_df = pd.DataFrame(columns=detail_cols)
+    detail_df = pd.concat([detail_df, new_df_local], ignore_index=True)
+    detail_df.to_csv(detail_path, index=False)
+    aggregated = _aggregate_detail(
+        detail_df,
+        key_cols=key_cols,
+        sum_cols=sum_cols,
+        first_cols=first_cols,
+    )
+    aggregated.to_csv(aggregate_path, index=False)
+    return aggregated, detail_df
+
+
+def _format_contributions(group: pd.DataFrame, value_col: str, decimals: int) -> str:
+    parts: List[str] = []
+    for _, row in group.iterrows():
+        sleeve = str(row.get("sleeve", "")).strip()
+        if not sleeve:
+            continue
+        try:
+            value = float(row.get(value_col, 0.0))
+        except (TypeError, ValueError):
+            value = 0.0
+        if not np.isfinite(value):
+            value = 0.0
+        parts.append(f"{sleeve}:{value:+.{decimals}f}")
+    if not parts:
+        return ""
+    parts.sort()
+    return ";".join(parts)
+
+
+def _net_account_targets(detail_df: pd.DataFrame) -> pd.DataFrame:
+    if detail_df.empty:
+        cols = ["month_end", "trade_date", "sleeve", "book", "ticker", "side",
+                "prev_weight", "target_weight", "delta_weight", "px_ref_open", "sector"]
+        return pd.DataFrame(columns=cols)
+    df = detail_df.copy()
+    weights = None
+    if "sleeve" in df.columns:
+        weights = df["sleeve"].map(SLEEVE_WEIGHTS).fillna(1.0)
+    for col in ["prev_weight", "target_weight", "delta_weight"]:
+        if col in df.columns:
+            series = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
+            if isinstance(weights, pd.Series):
+                series = series * weights
+            df[col] = series
+    group_keys = ["month_end", "trade_date", "book", "ticker"]
+    agg = (
+        df.groupby(group_keys, dropna=False)
+          .agg(prev_weight=("prev_weight", "sum"),
+               target_weight=("target_weight", "sum"),
+               delta_weight=("delta_weight", "sum"),
+               px_ref_open=("px_ref_open", "first"),
+               sector=("sector", "first"))
+          .reset_index()
+    )
+    contrib = (
+        df.groupby(group_keys, dropna=False)
+          .apply(lambda g: _format_contributions(g, "target_weight", 6))
+          .reset_index(name="sleeve")
+    )
+    agg = agg.merge(contrib, on=group_keys, how="left")
+
+    def _side(val: float) -> str:
+        if val > 0:
+            return "L"
+        if val < 0:
+            return "S"
+        return ""
+
+    agg["side"] = agg["target_weight"].apply(_side)
+    cols = ["month_end", "trade_date", "sleeve", "book", "ticker", "side",
+            "prev_weight", "target_weight", "delta_weight", "px_ref_open", "sector"]
+    return agg.loc[:, cols].sort_values(["book", "ticker"]).reset_index(drop=True)
+
+
+def _net_orders(detail_df: pd.DataFrame) -> pd.DataFrame:
+    if detail_df.empty:
+        cols = ["month_end", "trade_date", "sleeve", "book", "ticker", "side",
+                "action", "w_delta", "shares", "est_notional", "px_ref_open"]
+        return pd.DataFrame(columns=cols)
+    df = detail_df.copy()
+    weights = None
+    if "sleeve" in df.columns:
+        weights = df["sleeve"].map(SLEEVE_WEIGHTS).fillna(1.0)
+    for col in ["w_delta", "shares", "est_notional"]:
+        if col in df.columns:
+            series = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
+            if isinstance(weights, pd.Series):
+                series = series * weights
+            df[col] = series
+    group_keys = ["month_end", "trade_date", "book", "ticker"]
+    agg = (
+        df.groupby(group_keys, dropna=False)
+          .agg(w_delta=("w_delta", "sum"),
+               shares=("shares", "sum"),
+               est_notional=("est_notional", "sum"),
+               px_ref_open=("px_ref_open", "first"))
+          .reset_index()
+    )
+    contrib = (
+        df.groupby(group_keys, dropna=False)
+          .apply(lambda g: _format_contributions(g, "est_notional", 2))
+          .reset_index(name="sleeve")
+    )
+    agg = agg.merge(contrib, on=group_keys, how="left")
+
+    def _side_action(row: pd.Series) -> Tuple[str, str]:
+        shares = row.get("shares", 0.0)
+        w_delta = row.get("w_delta", 0.0)
+        if shares > 0:
+            return "L", "BUY"
+        if shares < 0:
+            return "S", "SELL"
+        if w_delta > 0:
+            return "L", "BUY"
+        if w_delta < 0:
+            return "S", "SELL"
+        return "", ""
+
+    rows = []
+    for _, row in agg.iterrows():
+        side, action = _side_action(row)
+        shares = row.get("shares", 0.0)
+        notional = row.get("est_notional", 0.0)
+        if side == "" and abs(shares) < 1e-6 and abs(notional) < 1e-2:
+            continue
+        row = row.copy()
+        row["side"] = side
+        row["action"] = action
+        rows.append(row)
+
+    if not rows:
+        cols = ["month_end", "trade_date", "sleeve", "book", "ticker", "side",
+                "action", "w_delta", "shares", "est_notional", "px_ref_open"]
+        return pd.DataFrame(columns=cols)
+
+    net_df = pd.DataFrame(rows)
+    if "shares" in net_df.columns:
+        net_df["shares"] = net_df["shares"].round().astype(int)
+        if "px_ref_open" in net_df.columns:
+            net_df["est_notional"] = net_df["shares"] * net_df["px_ref_open"]
+    cols = ["month_end", "trade_date", "sleeve", "book", "ticker", "side",
+            "action", "w_delta", "shares", "est_notional", "px_ref_open"]
+    return net_df.loc[:, cols].sort_values(["book", "ticker"]).reset_index(drop=True)
 
 
 def read_equity_data(cfg: Config) -> pd.DataFrame:
@@ -366,6 +610,9 @@ def run_analysis(cfg: Config) -> None:
     print("Forming portfolios and computing returns ...")
     deciles = decile_labels(10)
     rows = []
+    dispersion_values: List[float] = []
+    gate_flags: List[int] = []
+    dispersion_history: List[float] = []
     # Track portfolio target weights to compute turnover at each rebalance
     prev_w_d10: Dict[str, float] = {}
     prev_w_ls: Dict[str, float] = {}
@@ -472,6 +719,8 @@ def run_analysis(cfg: Config) -> None:
         strikes_short: List[Dict[str, int]] = [dict() for _ in range(cfg.cohorts)]
         seeded = False
 
+    dispersion_series = []
+
     for idx_loop, (d_mend, d_trade, d_next_trade) in enumerate(zip(mend_labels, trade_dates, next_trade_dates)):
         # Check if this is live trading mode (trade date not in our price data)
         is_live_trading = d_trade not in po.index
@@ -534,6 +783,76 @@ def run_analysis(cfg: Config) -> None:
         labels = labels.loc[valid_names]
         stock_ret = stock_ret.loc[valid_names]
 
+        period_label = pd.Period(d_mend, freq='M').strftime('%Y-%m')
+        long_med_slice = rolling_med_vol.loc[d_mend].reindex(valid_names)
+        risk_profiles = compute_delisting_risk(
+            po,
+            pv,
+            list(valid_names),
+            d_mend,
+            long_med_slice,
+            float(cfg.liquidity_threshold),
+            RISK_CONFIG,
+        )
+        risk_multiplier_map = {t: float(info.get("multiplier", 1.0)) for t, info in risk_profiles.items()}
+        risk_universe_summary = summarize_universe(risk_profiles)
+        risk_flag_rows: List[Dict[str, object]] = []
+        for ticker, info in risk_profiles.items():
+            score = int(info.get("score", 0))
+            if score <= 0:
+                continue
+            flags = info.get("flags", [])
+            risk_flag_rows.append(
+                {
+                    "month_end": d_mend,
+                    "trade_date": d_trade,
+                    "ticker": ticker,
+                    "score": score,
+                    "multiplier": float(info.get("multiplier", 1.0)),
+                    "flags": "|".join(flags) if flags else "",
+                    "trading_days": int(info.get("trading_days", 0)),
+                    "max_halt_run": int(info.get("max_halt_run", 0)),
+                    "short_median_volume": float(info.get("short_median_volume", np.nan)),
+                    "long_median_volume": float(info.get("long_median_volume", np.nan)),
+                    "zero_volume_days": int(info.get("zero_volume_days", 0)),
+                }
+            )
+        risk_flag_cols = [
+            "month_end",
+            "trade_date",
+            "ticker",
+            "score",
+            "multiplier",
+            "flags",
+            "trading_days",
+            "max_halt_run",
+            "short_median_volume",
+            "long_median_volume",
+            "zero_volume_days",
+        ]
+        df_risk_flags = pd.DataFrame(risk_flag_rows, columns=risk_flag_cols)
+        df_risk_flags.to_csv(os.path.join(out_dir, f"risk_flags_{period_label}.csv"), index=False)
+
+        def apply_haircut_base(base_weights: Dict[str, float], gross: float) -> Dict[str, float]:
+            if not base_weights:
+                return {}
+            adj_abs: Dict[str, float] = {}
+            total = 0.0
+            for ticker, weight in base_weights.items():
+                mult = float(risk_multiplier_map.get(ticker, 1.0))
+                scaled = abs(weight) * max(mult, 0.0)
+                if scaled > 0:
+                    adj_abs[ticker] = scaled
+                    total += scaled
+            if total <= 0:
+                return dict(base_weights)
+            scale = gross / total if gross > 0 else 1.0
+            out: Dict[str, float] = {}
+            for ticker, scaled in adj_abs.items():
+                sign = 1.0 if base_weights.get(ticker, 0.0) >= 0 else -1.0
+                out[ticker] = sign * scaled * scale
+            return out
+
         # compute decile returns (equal-weight) for reference only in non-staggered mode
         d10_members = labels[labels == 10].index.tolist()
         d1_members = labels[labels == 1].index.tolist()
@@ -563,6 +882,50 @@ def run_analysis(cfg: Config) -> None:
             perc = rnk * 0.0 + 0.5
         perc = perc.astype(float)
 
+        # Sector dispersion metric for gating (based on signal dispersion within sectors)
+        dispersion_value = np.nan
+        if ticker_sector:
+            scores_for_disp = signal_for_rank.loc[valid_names]
+            sectors_for_disp = scores_for_disp.index.map(lambda t: ticker_sector.get(t, "Unknown"))
+            df_disp = pd.DataFrame({"score": scores_for_disp, "sector": sectors_for_disp})
+
+            def _dispersion_span(x: pd.Series) -> float:
+                if len(x) >= 5:
+                    return float(np.nanpercentile(x, 90) - np.nanpercentile(x, 10))
+                if len(x) >= 2:
+                    return float(x.max() - x.min())
+                return np.nan
+
+            dispersion_per_sector = df_disp.groupby("sector")["score"].agg(_dispersion_span)
+            if not dispersion_per_sector.dropna().empty:
+                dispersion_value = float(dispersion_per_sector.dropna().mean())
+
+        gate_active = True
+        gate_block = False
+        threshold = float("nan")
+        if getattr(cfg, "dispersion_gate", None):
+            quantile_map = {
+                "quantile50": 0.50,
+                "quantile60": 0.60,
+                "quantile70": 0.70,
+                "quantile80": 0.80,
+                "quantile90": 0.90,
+            }
+            q = quantile_map.get(cfg.dispersion_gate)
+            history_vals = [val for val in dispersion_history if val is not None and not np.isnan(val)]
+            if cfg.dispersion_gate_window and history_vals:
+                history_vals = history_vals[-cfg.dispersion_gate_window :]
+            if q is not None and history_vals:
+                threshold = float(np.nanquantile(history_vals, q))
+                gate_active = np.isfinite(dispersion_value) and dispersion_value >= threshold
+            else:
+                gate_active = True
+            gate_block = not gate_active
+            if gate_block:
+                val_str = f"{dispersion_value:.4f}" if np.isfinite(dispersion_value) else "nan"
+                thr_str = f"{threshold:.4f}" if np.isfinite(threshold) else "nan"
+                print(f"Dispersion gate blocking rebalances on {pd.Timestamp(d_mend).date()}: dispersion={val_str}, threshold={thr_str}")
+
         # Function to build LS target weights from banded membership and beta-neutral sleeves
         def build_ls_target(prev_w: Dict[str, float]) -> Dict[str, float]:
             prev_long = {k for k, v in prev_w.items() if v > 0}
@@ -575,6 +938,10 @@ def run_analysis(cfg: Config) -> None:
             S = sorted(set(shorts_keep).union(shorts_add))
             wL_base = {t: 0.5 / len(L) for t in L} if L else {}
             wS_base = {t: -0.5 / len(S) for t in S} if S else {}
+            if wL_base:
+                wL_base = apply_haircut_base(wL_base, 0.5)
+            if wS_base:
+                wS_base = apply_haircut_base(wS_base, 0.5)
             union = list(set(L) | set(S))
             if not union:
                 return {}
@@ -603,7 +970,69 @@ def run_analysis(cfg: Config) -> None:
             L = sorted(set(longs_keep).union(longs_add))
             if not L:
                 return {}
-            return {t: 1.0 / len(L) for t in L}
+            base = {t: 1.0 / len(L) for t in L}
+            return apply_haircut_base(base, 1.0)
+
+        if not use_staggered:
+            w_d10_new = build_d10_target(prev_w_d10)
+            w_ls_new = build_ls_target(prev_w_ls)
+
+        if use_staggered and gate_block:
+            d10_rets = []
+            ls_rets = []
+            gross_long_vals = []
+            gross_short_vals = []
+            for j in range(cfg.cohorts):
+                prev_d10 = prev_w_d10_coh[j]
+                prev_ls = prev_w_ls_coh[j]
+                r_d10 = ew_long_return(prev_d10, stock_ret)
+                if r_d10 is not None:
+                    d10_rets.append(r_d10)
+                if prev_ls:
+                    names_ls = [k for k in prev_ls if k in stock_ret.index and pd.notna(stock_ret[k])]
+                    if names_ls:
+                        ls_rets.append(float(sum(prev_ls[k] * float(stock_ret[k]) for k in names_ls)))
+                gross_long_vals.append(sum(max(0.0, v) for v in prev_ls.values()))
+                gross_short_vals.append(sum(-min(0.0, v) for v in prev_ls.values()))
+                # advance durations since positions are carried
+                dur_long[j] = {k: dur_long[j].get(k, 0) + 1 for k, v in prev_ls.items() if v > 0}
+                dur_short[j] = {k: dur_short[j].get(k, 0) + 1 for k, v in prev_ls.items() if v < 0}
+            d10_comp = float(np.nanmean(d10_rets)) if d10_rets else np.nan
+            ls_comp = float(np.nanmean(ls_rets)) if ls_rets else np.nan
+            avg_long = float(np.nanmean(gross_long_vals)) if gross_long_vals else np.nan
+            avg_short = float(np.nanmean(gross_short_vals)) if gross_short_vals else np.nan
+            ls_summary = summarize_weight_exposure(prev_w_ls_coh, risk_profiles)
+            d10_summary = summarize_weight_exposure(prev_w_d10_coh, risk_profiles)
+            rows.append({
+                "month_end": d_mend,
+                "trade_date": d_trade,
+                "next_trade_date": d_next_trade,
+                "D10": d10_comp,
+                "LS": ls_comp,
+                "turnover_D10": 0.0,
+                "turnover_LS": 0.0,
+                "turnover_LS_reconst": 0.0,
+                "turnover_LS_reweight": 0.0,
+                "ls_gross_long": avg_long,
+                "ls_gross_short": avg_short,
+                "risk_ls_weighted_multiplier": float(ls_summary.get("weighted_multiplier", np.nan)),
+                "risk_ls_weighted_score": float(ls_summary.get("weighted_score", np.nan)),
+                "risk_ls_flagged": float(ls_summary.get("flagged", 0.0)),
+                "risk_ls_high": float(ls_summary.get("high", 0.0)),
+                "risk_d10_weighted_multiplier": float(d10_summary.get("weighted_multiplier", np.nan)),
+                "risk_d10_weighted_score": float(d10_summary.get("weighted_score", np.nan)),
+                "risk_d10_flagged": float(d10_summary.get("flagged", 0.0)),
+                "risk_d10_high": float(d10_summary.get("high", 0.0)),
+                "risk_universe_flagged": float(risk_universe_summary.get("flagged", 0.0)),
+                "risk_universe_high": float(risk_universe_summary.get("high", 0.0)),
+                "risk_universe_avg_multiplier": float(risk_universe_summary.get("avg_multiplier", np.nan)),
+            })
+            dispersion_values.append(dispersion_value)
+            gate_flags.append(1 if gate_active else 0)
+            dispersion_history.append(dispersion_value)
+            for tkr, val in perc.items():
+                prev_perc_map[tkr] = float(val)
+            continue
 
         if use_staggered:
             # Initialize all cohorts with first available weights for sensible startup using banded targets
@@ -628,6 +1057,8 @@ def run_analysis(cfg: Config) -> None:
             to_ls_list = []
             to_ls_reconst_list = []
             to_ls_reweight_list = []
+            ls_gross_long_list: List[float] = []
+            ls_gross_short_list: List[float] = []
             # Capture targets for manual execution/export (per month across cohorts)
             target_rows: List[Dict[str, object]] = []
 
@@ -944,6 +1375,7 @@ def run_analysis(cfg: Config) -> None:
                                         for kk in w:
                                             w[kk] = max(0.0, w[kk] * sc)
                         # Emergency re-equalize if concentration too high
+                        w = apply_haircut_base(w, gross)
                         shares = [v / gross for v in w.values() if v > 0]
                         effN = 1.0 / sum((x * x for x in shares)) if shares else 0.0
                         if (effN < cfg.effn_ratio * max(1, n_target)) or (len([1 for v in w.values() if v <= floor]) > cfg.zero_frac * max(1, n_target)):
@@ -1008,6 +1440,7 @@ def run_analysis(cfg: Config) -> None:
                             elif prev_side == 'S':
                                 dur = int(dur_short[j].get(t, 0))
                                 strikes = int(strikes_short[j].get(t, 0))
+                        risk_info = risk_profiles.get(t, {})
                         target_rows.append({
                             'month_end': d_mend,
                             'trade_date': d_trade,
@@ -1023,6 +1456,9 @@ def run_analysis(cfg: Config) -> None:
                             'duration_months': dur if dur is not None else 0,
                             'strikes': strikes if strikes is not None else 0,
                             'px_ref_open': float(px_open.get(t, np.nan)) if t in px_open.index else np.nan,
+                            'delist_risk_score': int(risk_info.get('score', 0)),
+                            'delist_risk_flags': "|".join(risk_info.get('flags', [])) if risk_info.get('flags') else '',
+                            'delist_risk_multiplier': float(risk_info.get('multiplier', 1.0)),
                         })
                     # D10 book rows (long-only)
                     d10_names = set(prev_d10_w.keys()) | set(new_d10.keys())
@@ -1040,6 +1476,7 @@ def run_analysis(cfg: Config) -> None:
                         else:
                             rationale = 'keep' if abs(nw - pw) <= 1e-9 else 'reweight'
                         dur = int(dur_long[j].get(t, 0)) + (1 if new_in else 0)
+                        risk_info = risk_profiles.get(t, {})
                         target_rows.append({
                             'month_end': d_mend,
                             'trade_date': d_trade,
@@ -1055,6 +1492,9 @@ def run_analysis(cfg: Config) -> None:
                             'duration_months': dur,
                             'strikes': int(strikes_long[j].get(t, 0)),
                             'px_ref_open': float(px_open.get(t, np.nan)) if t in px_open.index else np.nan,
+                            'delist_risk_score': int(risk_info.get('score', 0)),
+                            'delist_risk_flags': "|".join(risk_info.get('flags', [])) if risk_info.get('flags') else '',
+                            'delist_risk_multiplier': float(risk_info.get('multiplier', 1.0)),
                         })
                 except Exception:
                     # Targets export must not affect backtest; swallow errors
@@ -1095,6 +1535,11 @@ def run_analysis(cfg: Config) -> None:
                         dur_short[j].pop(k, None)
                         strikes_short[j].pop(k, None)
 
+                gross_long = float(sum(max(0.0, v) for v in new_ls.values()))
+                gross_short = float(sum(-min(0.0, v) for v in new_ls.values()))
+                ls_gross_long_list.append(gross_long)
+                ls_gross_short_list.append(gross_short)
+
 
                 # Returns for this cohort using current weights
                 r_d10 = ew_long_return(new_d10, stock_ret)
@@ -1111,6 +1556,8 @@ def run_analysis(cfg: Config) -> None:
             d10_comp = float(np.mean(d10_rets)) if d10_rets else np.nan
             ls_comp = float(np.mean(ls_rets)) if ls_rets else np.nan
             # Composite turnover = average of cohort turnovers
+            ls_summary = summarize_weight_exposure(prev_w_ls_coh, risk_profiles)
+            d10_summary = summarize_weight_exposure(prev_w_d10_coh, risk_profiles)
             rows.append({
                 "month_end": d_mend,
                 "trade_date": d_trade,
@@ -1121,7 +1568,23 @@ def run_analysis(cfg: Config) -> None:
                 "turnover_LS": float(np.mean(to_ls_list)) if to_ls_list else np.nan,
                 "turnover_LS_reconst": float(np.mean(to_ls_reconst_list)) if to_ls_reconst_list else np.nan,
                 "turnover_LS_reweight": float(np.mean(to_ls_reweight_list)) if to_ls_reweight_list else np.nan,
+                "ls_gross_long": float(np.mean(ls_gross_long_list)) if ls_gross_long_list else np.nan,
+                "ls_gross_short": float(np.mean(ls_gross_short_list)) if ls_gross_short_list else np.nan,
+                "risk_ls_weighted_multiplier": float(ls_summary.get("weighted_multiplier", np.nan)),
+                "risk_ls_weighted_score": float(ls_summary.get("weighted_score", np.nan)),
+                "risk_ls_flagged": float(ls_summary.get("flagged", 0.0)),
+                "risk_ls_high": float(ls_summary.get("high", 0.0)),
+                "risk_d10_weighted_multiplier": float(d10_summary.get("weighted_multiplier", np.nan)),
+                "risk_d10_weighted_score": float(d10_summary.get("weighted_score", np.nan)),
+                "risk_d10_flagged": float(d10_summary.get("flagged", 0.0)),
+                "risk_d10_high": float(d10_summary.get("high", 0.0)),
+                "risk_universe_flagged": float(risk_universe_summary.get("flagged", 0.0)),
+                "risk_universe_high": float(risk_universe_summary.get("high", 0.0)),
+                "risk_universe_avg_multiplier": float(risk_universe_summary.get("avg_multiplier", np.nan)),
             })
+            dispersion_values.append(dispersion_value)
+            gate_flags.append(1 if gate_active else 0)
+            dispersion_history.append(dispersion_value)
             # Write targets export (per month) and optional orders export
             try:
                 if target_rows:
@@ -1169,16 +1632,38 @@ def run_analysis(cfg: Config) -> None:
                                     df_targets.loc[mask_ls, 'vt_curr'] = vt_curr
                     except Exception:
                         pass
+                    if "sleeve" not in df_targets.columns:
+                        insert_pos = df_targets.columns.get_loc("cohort_id") + 1 if "cohort_id" in df_targets.columns else 0
+                        df_targets.insert(insert_pos, "sleeve", "momentum")
+                    df_targets["sleeve"] = "momentum"
                     df_targets.sort_values(["book", "cohort_id", "side", "ticker"], inplace=True)
-                    df_targets.to_csv(os.path.join(out_dir, f"targets_{period_label}.csv"), index=False)
+                    df_targets_sleeve = df_targets.copy()
+                    targets_path = os.path.join(out_dir, f"targets_{period_label}.csv")
+                    if os.path.exists(targets_path):
+                        existing_targets = pd.read_csv(targets_path)
+                        if "sleeve" not in existing_targets.columns:
+                            insert_pos_existing = existing_targets.columns.get_loc("cohort_id") + 1 if "cohort_id" in existing_targets.columns else 0
+                            existing_targets.insert(insert_pos_existing, "sleeve", "unknown")
+                        existing_targets = existing_targets[existing_targets["sleeve"] != "momentum"]
+                        df_targets_output = pd.concat([existing_targets, df_targets_sleeve], ignore_index=True)
+                    else:
+                        df_targets_output = df_targets_sleeve.copy()
+                    df_targets_output.sort_values(["book", "cohort_id", "side", "ticker"], inplace=True)
+                    df_targets_output.to_csv(targets_path, index=False)
+                    df_targets = df_targets_sleeve
                     # Optional orders export if live capital is provided
                     if getattr(cfg, 'live_capital', None) is not None:
                         live_cap = float(cfg.live_capital)  # type: ignore
                         lot = int(getattr(cfg, 'lot_size', 1))
                         ord_rows = []
+                        ord_rows_detail_for_alloc = []
                         for _, r in df_targets.iterrows():
                             dw = float(r.get('delta_weight', 0.0))
-                            px = float(r.get('px_ref_open', float('nan')))
+                            raw_px = r.get('px_ref_open', float('nan'))
+                            try:
+                                px = float(raw_px)
+                            except (TypeError, ValueError):
+                                continue
                             if not np.isfinite(px) or dw == 0.0:
                                 continue
                             shares = dw * live_cap / px
@@ -1198,6 +1683,7 @@ def run_analysis(cfg: Config) -> None:
                                 'month_end': r['month_end'],
                                 'trade_date': r['trade_date'],
                                 'cohort_id': int(r['cohort_id']),
+                                'sleeve': 'momentum',
                                 'book': r['book'],
                                 'ticker': r['ticker'],
                                 'side': r['side'],
@@ -1208,9 +1694,32 @@ def run_analysis(cfg: Config) -> None:
                                 'est_notional': float(px * shares),
                                 'rationale': r.get('rationale', ''),
                             })
+                            ord_rows_detail_for_alloc.append({
+                                'month_end': r['month_end'],
+                                'trade_date': r['trade_date'],
+                                'sleeve': 'momentum',
+                                'book': r['book'],
+                                'ticker': r['ticker'],
+                                'side': r['side'],
+                                'action': action if not openclose else openclose,
+                                'w_delta': dw,
+                                'px_ref_open': px,
+                                'shares': int(shares),
+                                'est_notional': float(px * shares),
+                                'cohort_id': int(r['cohort_id']),
+                            })
                         if ord_rows:
-                            pd.DataFrame(ord_rows).sort_values(["book", "cohort_id", "ticker"]).to_csv(
-                                os.path.join(out_dir, f"orders_{period_label}.csv"), index=False
+                            df_orders_cohort = pd.DataFrame(ord_rows)
+                            orders_path = os.path.join(out_dir, f"orders_{period_label}.csv")
+                            if os.path.exists(orders_path):
+                                existing_orders = pd.read_csv(orders_path)
+                                if "sleeve" not in existing_orders.columns:
+                                    insert_pos_orders = existing_orders.columns.get_loc("cohort_id") + 1 if "cohort_id" in existing_orders.columns else 0
+                                    existing_orders.insert(insert_pos_orders, "sleeve", "unknown")
+                                existing_orders = existing_orders[existing_orders["sleeve"] != "momentum"]
+                                df_orders_cohort = pd.concat([existing_orders, df_orders_cohort], ignore_index=True)
+                            df_orders_cohort.sort_values(["book", "cohort_id", "ticker"]).to_csv(
+                                orders_path, index=False
                             )
 
                             # Aggregate to account-level targets (net across cohorts)
@@ -1243,20 +1752,36 @@ def run_analysis(cfg: Config) -> None:
                                 agg["side"] = agg.apply(_agg_side, axis=1)
                                 agg.insert(0, "trade_date", d_trade)
                                 agg.insert(0, "month_end", d_mend)
-                                # Order columns for readability
+                                agg.insert(2, "sleeve", "momentum")
                                 cols = [
-                                    "month_end", "trade_date", "book", "ticker", "side",
+                                    "month_end", "trade_date", "sleeve", "book", "ticker", "side",
                                     "prev_weight", "target_weight", "delta_weight",
                                     "px_ref_open", "sector"
                                 ]
-                                df_account_targets = agg.loc[:, cols].sort_values(["book", "ticker"])  # type: ignore
-                                df_account_targets.to_csv(os.path.join(out_dir, f"account_targets_{period_label}.csv"), index=False)
+                                df_account_targets_new = agg.loc[:, cols].sort_values(["book", "ticker"])  # type: ignore
+                                detail_path = os.path.join(out_dir, f"account_targets_{period_label}_by_sleeve.csv")
+                                aggregate_path = os.path.join(out_dir, f"account_targets_{period_label}.csv")
+                                df_account_targets, df_account_targets_detail = _update_detail_and_aggregate(
+                                    detail_path,
+                                    aggregate_path,
+                                    df_account_targets_new,
+                                    key_cols=["month_end", "trade_date", "book", "ticker", "side"],
+                                    sum_cols=["prev_weight", "target_weight", "delta_weight"],
+                                    first_cols=["px_ref_open", "sector"],
+                                    sleeve_value="momentum",
+                                )
+                                df_account_targets = _net_account_targets(df_account_targets_detail)
+                                df_account_targets.to_csv(aggregate_path, index=False)
 
                                 # Generate netted live orders (one per symbol/book) directly from account-level delta weights
-                                ord_agg_rows = []
-                                for _, r in df_account_targets.iterrows():
+                                ord_detail_rows = []
+                                for _, r in df_account_targets_new.iterrows():
                                     dw = float(r.get('delta_weight', 0.0))
-                                    px = float(r.get('px_ref_open', float('nan')))
+                                    raw_px = r.get('px_ref_open', float('nan'))
+                                    try:
+                                        px = float(raw_px)
+                                    except (TypeError, ValueError):
+                                        continue
                                     if not np.isfinite(px) or dw == 0.0:
                                         continue
                                     shares = dw * live_cap / px
@@ -1268,9 +1793,10 @@ def run_analysis(cfg: Config) -> None:
                                     if shares == 0:
                                         continue
                                     action = 'BUY' if shares > 0 else 'SELL'
-                                    ord_agg_rows.append({
+                                    ord_detail_rows.append({
                                         'month_end': r['month_end'],
                                         'trade_date': r['trade_date'],
+                                        'sleeve': 'momentum',
                                         'book': r['book'],
                                         'ticker': r['ticker'],
                                         'side': r['side'],
@@ -1280,9 +1806,27 @@ def run_analysis(cfg: Config) -> None:
                                         'shares': int(shares),
                                         'est_notional': float(px * shares),
                                     })
-                                if ord_agg_rows:
-                                    df_orders_live = pd.DataFrame(ord_agg_rows).sort_values(["book", "ticker"])  # type: ignore
-                                    df_orders_live.to_csv(os.path.join(out_dir, f"orders_live_{period_label}.csv"), index=False)
+                                orders_live_path = os.path.join(out_dir, f"orders_live_{period_label}.csv")
+                                orders_live_detail_path = os.path.join(out_dir, f"orders_live_{period_label}_by_sleeve.csv")
+                                if ord_detail_rows:
+                                    df_orders_live_new = pd.DataFrame(ord_detail_rows)
+                                    df_orders_live, df_orders_live_detail = _update_detail_and_aggregate(
+                                        orders_live_detail_path,
+                                        orders_live_path,
+                                        df_orders_live_new,
+                                        key_cols=["month_end", "trade_date", "book", "ticker", "side", "action"],
+                                        sum_cols=["w_delta", "shares", "est_notional"],
+                                        first_cols=["px_ref_open"],
+                                        sleeve_value="momentum",
+                                    )
+                                elif os.path.exists(orders_live_path):
+                                    df_orders_live = pd.read_csv(orders_live_path)
+                                    df_orders_live_detail = pd.read_csv(orders_live_detail_path) if os.path.exists(orders_live_detail_path) else pd.DataFrame()
+                                else:
+                                    df_orders_live = pd.DataFrame()
+                                    df_orders_live_detail = pd.DataFrame()
+                                df_orders_live = _net_orders(df_orders_live_detail)
+                                df_orders_live.to_csv(orders_live_path, index=False)
 
                                 # Optional: Cold-start exports for bootstrapping new accounts
                                 if getattr(cfg, 'cold_start', False):
@@ -1310,14 +1854,34 @@ def run_analysis(cfg: Config) -> None:
                                             cold.insert(0, 'trade_date', d_trade)
                                         if 'month_end' not in cold.columns:
                                             cold.insert(0, 'month_end', d_mend)
-                                        df_account_targets_cs = cold.loc[:, cols].sort_values(["book", "ticker"])  # type: ignore
-                                        df_account_targets_cs.to_csv(os.path.join(out_dir, f"account_targets_coldstart_{period_label}.csv"), index=False)
+                                        if 'sleeve' not in cold.columns:
+                                            cold.insert(2, 'sleeve', "momentum")
+                                        else:
+                                            cold['sleeve'] = "momentum"
+                                        df_account_targets_cs_new = cold.loc[:, cols].sort_values(["book", "ticker"])  # type: ignore
+                                        cs_detail_path = os.path.join(out_dir, f"account_targets_coldstart_{period_label}_by_sleeve.csv")
+                                        cs_agg_path = os.path.join(out_dir, f"account_targets_coldstart_{period_label}.csv")
+                                        df_account_targets_cs, df_account_targets_cs_detail = _update_detail_and_aggregate(
+                                            cs_detail_path,
+                                            cs_agg_path,
+                                            df_account_targets_cs_new,
+                                            key_cols=["month_end", "trade_date", "book", "ticker", "side"],
+                                            sum_cols=["prev_weight", "target_weight", "delta_weight"],
+                                            first_cols=["px_ref_open", "sector"],
+                                            sleeve_value="momentum",
+                                        )
+                                        df_account_targets_cs = _net_account_targets(df_account_targets_cs_detail)
+                                        df_account_targets_cs.to_csv(cs_agg_path, index=False)
 
                                         # Build cold-start live orders from cold-start delta weights
-                                        ord_cs_rows = []
-                                        for _, r in df_account_targets_cs.iterrows():
+                                        ord_cs_rows_detail = []
+                                        for _, r in df_account_targets_cs_new.iterrows():
                                             dw = float(r.get('delta_weight', 0.0))
-                                            px = float(r.get('px_ref_open', float('nan')))
+                                            raw_px = r.get('px_ref_open', float('nan'))
+                                            try:
+                                                px = float(raw_px)
+                                            except (TypeError, ValueError):
+                                                continue
                                             if not np.isfinite(px) or dw == 0.0:
                                                 continue
                                             shares = dw * live_cap / px
@@ -1328,9 +1892,10 @@ def run_analysis(cfg: Config) -> None:
                                             if shares == 0:
                                                 continue
                                             action = 'BUY' if shares > 0 else 'SELL'
-                                            ord_cs_rows.append({
+                                            ord_cs_rows_detail.append({
                                                 'month_end': r['month_end'],
                                                 'trade_date': r['trade_date'],
+                                                'sleeve': 'momentum',
                                                 'book': r['book'],
                                                 'ticker': r['ticker'],
                                                 'side': r['side'],
@@ -1340,9 +1905,26 @@ def run_analysis(cfg: Config) -> None:
                                                 'shares': int(shares),
                                                 'est_notional': float(px * shares),
                                             })
-                                        if ord_cs_rows:
-                                            df_orders_live_cs = pd.DataFrame(ord_cs_rows).sort_values(["book", "ticker"])  # type: ignore
-                                            df_orders_live_cs.to_csv(os.path.join(out_dir, f"orders_live_coldstart_{period_label}.csv"), index=False)
+                                        cs_orders_detail_path = os.path.join(out_dir, f"orders_live_coldstart_{period_label}_by_sleeve.csv")
+                                        cs_orders_path = os.path.join(out_dir, f"orders_live_coldstart_{period_label}.csv")
+                                        if ord_cs_rows_detail:
+                                            df_orders_live_cs_new = pd.DataFrame(ord_cs_rows_detail)
+                                            df_orders_live_cs, df_orders_live_cs_detail = _update_detail_and_aggregate(
+                                                cs_orders_detail_path,
+                                                cs_orders_path,
+                                                df_orders_live_cs_new,
+                                                key_cols=["month_end", "trade_date", "book", "ticker", "side", "action"],
+                                                sum_cols=["w_delta", "shares", "est_notional"],
+                                                first_cols=["px_ref_open"],
+                                                sleeve_value="momentum",
+                                            )
+                                            df_orders_live_cs = _net_orders(df_orders_live_cs_detail)
+                                            df_orders_live_cs.to_csv(cs_orders_path, index=False)
+                                        elif os.path.exists(cs_orders_path):
+                                            df_orders_live_cs = pd.read_csv(cs_orders_path)
+                                            df_orders_live_cs_detail = pd.read_csv(cs_orders_detail_path) if os.path.exists(cs_orders_detail_path) else pd.DataFrame()
+                                            df_orders_live_cs = _net_orders(df_orders_live_cs_detail)
+                                            df_orders_live_cs.to_csv(cs_orders_path, index=False)
                                     except Exception:
                                         # Cold-start is best-effort; do not interrupt run
                                         pass
@@ -1350,15 +1932,18 @@ def run_analysis(cfg: Config) -> None:
                                 # Create allocations plan mapping parent orders back to cohorts
                                 # Parent quantities per (book, ticker)
                                 parent_qty = {}
-                                for r in ord_agg_rows:
+                                for _, r in df_orders_live.iterrows():
                                     key = (r['book'], r['ticker'])
-                                    parent_qty[key] = int(r['shares'])
+                                    try:
+                                        parent_qty[key] = int(round(float(r.get('shares', 0))))
+                                    except Exception:
+                                        parent_qty[key] = int(float(r.get('shares', 0)))
 
-                                # Child (cohort) desired quantities per (book, ticker, cohort)
+                                # Child (cohort) desired quantities per (book, ticker, cohort) using detail rows
                                 child_qty = {}
-                                for r in ord_rows:
+                                for r in ord_rows_detail_for_alloc:
                                     key = (r['book'], r['ticker'], int(r['cohort_id']))
-                                    child_qty[key] = int(r['shares'])
+                                    child_qty[key] = child_qty.get(key, 0) + int(r['shares'])
 
                                 # Build allocation ratios for cohorts aligned with parent side
                                 alloc_rows = []
@@ -1424,6 +2009,8 @@ def run_analysis(cfg: Config) -> None:
                             "strikes_long": strikes_long[j],
                             "strikes_short": strikes_short[j],
                             "ls_target_counts": {"long": int(ls_target_counts_L[j]), "short": int(ls_target_counts_S[j])},
+                            "delist_risk": {t: risk_profiles.get(t, {"score": 0, "flags": [], "multiplier": 1.0})
+                                             for t in set(prev_w_ls_coh[j].keys()) | set(prev_w_d10_coh[j].keys())},
                         }
                         with open(os.path.join(state_dir, f"cohort_{j}_{period_label}.json"), "w", encoding="utf-8") as fh:
                             json.dump(snap, fh, ensure_ascii=False, indent=2)
@@ -1444,14 +2031,59 @@ def run_analysis(cfg: Config) -> None:
                 else:
                     d_rets[k] = float(stock_ret.loc[members].mean())
 
+            if gate_block:
+                r_ls = None
+                if prev_w_ls:
+                    names_ls = [k for k in prev_w_ls if k in stock_ret.index and pd.notna(stock_ret[k])]
+                    if names_ls:
+                        r_ls = float(sum(prev_w_ls[k] * float(stock_ret[k]) for k in names_ls))
+                if r_ls is None:
+                    r_ls = np.nan
+                gross_long = float(sum(max(0.0, v) for v in prev_w_ls.values())) if prev_w_ls else np.nan
+                gross_short = float(sum(-min(0.0, v) for v in prev_w_ls.values())) if prev_w_ls else np.nan
+                ls_summary = summarize_weight_exposure(prev_w_ls, risk_profiles)
+                d10_summary = summarize_weight_exposure(prev_w_d10, risk_profiles)
+                rows.append({
+                    "month_end": d_mend,
+                    "trade_date": d_trade,
+                    "next_trade_date": d_next_trade,
+                    **{f"D{k}": d_rets.get(k, np.nan) for k in deciles},
+                    "LS": r_ls,
+                    "turnover_D10": 0.0,
+                    "turnover_LS": 0.0,
+                    "ls_gross_long": gross_long,
+                    "ls_gross_short": gross_short,
+                    "risk_ls_weighted_multiplier": float(ls_summary.get("weighted_multiplier", np.nan)),
+                    "risk_ls_weighted_score": float(ls_summary.get("weighted_score", np.nan)),
+                    "risk_ls_flagged": float(ls_summary.get("flagged", 0.0)),
+                    "risk_ls_high": float(ls_summary.get("high", 0.0)),
+                    "risk_d10_weighted_multiplier": float(d10_summary.get("weighted_multiplier", np.nan)),
+                    "risk_d10_weighted_score": float(d10_summary.get("weighted_score", np.nan)),
+                    "risk_d10_flagged": float(d10_summary.get("flagged", 0.0)),
+                    "risk_d10_high": float(d10_summary.get("high", 0.0)),
+                    "risk_universe_flagged": float(risk_universe_summary.get("flagged", 0.0)),
+                    "risk_universe_high": float(risk_universe_summary.get("high", 0.0)),
+                    "risk_universe_avg_multiplier": float(risk_universe_summary.get("avg_multiplier", np.nan)),
+                })
+                dispersion_values.append(dispersion_value)
+                gate_flags.append(1 if gate_active else 0)
+                dispersion_history.append(dispersion_value)
+                for tkr, val in perc.items():
+                    prev_perc_map[tkr] = float(val)
+                continue
+
             # LS return via weighted sum of stock returns (all rebalanced now)
             ls_ret = float(sum(w_ls_new.get(t, 0.0) * stock_ret.get(t, np.nan) for t in w_ls_new.keys()))
+            gross_long = float(sum(max(0.0, v) for v in w_ls_new.values()))
+            gross_short = float(sum(-min(0.0, v) for v in w_ls_new.values()))
 
             # Turnover using current target weights
             to_d10 = compute_turnover(prev_w_d10, w_d10_new)
             to_ls = compute_turnover(prev_w_ls, w_ls_new)
             prev_w_d10 = w_d10_new
             prev_w_ls = w_ls_new
+            ls_summary = summarize_weight_exposure(w_ls_new, risk_profiles)
+            d10_summary = summarize_weight_exposure(w_d10_new, risk_profiles)
 
             rows.append({
                 "month_end": d_mend,
@@ -1461,12 +2093,35 @@ def run_analysis(cfg: Config) -> None:
                 "LS": ls_ret,
                 "turnover_D10": to_d10,
                 "turnover_LS": to_ls,
+                "ls_gross_long": gross_long,
+                "ls_gross_short": gross_short,
+                "risk_ls_weighted_multiplier": float(ls_summary.get("weighted_multiplier", np.nan)),
+                "risk_ls_weighted_score": float(ls_summary.get("weighted_score", np.nan)),
+                "risk_ls_flagged": float(ls_summary.get("flagged", 0.0)),
+                "risk_ls_high": float(ls_summary.get("high", 0.0)),
+                "risk_d10_weighted_multiplier": float(d10_summary.get("weighted_multiplier", np.nan)),
+                "risk_d10_weighted_score": float(d10_summary.get("weighted_score", np.nan)),
+                "risk_d10_flagged": float(d10_summary.get("flagged", 0.0)),
+                "risk_d10_high": float(d10_summary.get("high", 0.0)),
+                "risk_universe_flagged": float(risk_universe_summary.get("flagged", 0.0)),
+                "risk_universe_high": float(risk_universe_summary.get("high", 0.0)),
+                "risk_universe_avg_multiplier": float(risk_universe_summary.get("avg_multiplier", np.nan)),
             })
+            dispersion_values.append(dispersion_value)
+            gate_flags.append(1 if gate_active else 0)
+            dispersion_history.append(dispersion_value)
 
     if not rows:
         raise RuntimeError("No portfolio months constructed (check data coverage).")
 
     pf = pd.DataFrame(rows).set_index("month_end").sort_index()
+
+    if dispersion_values:
+        pf["dispersion"] = pd.Series(dispersion_values, index=pf.index)
+        pf["dispersion_gate_active"] = pd.Series(gate_flags, index=pf.index)
+
+    if "LS" in pf.columns and "LS_pre_overlay" not in pf.columns:
+        pf["LS_pre_overlay"] = pf["LS"].astype(float)
 
     # 6) CDI and benchmark (BOVA11) returns over the same periods
     print("Computing CDI and benchmark returns ...")
@@ -1575,6 +2230,27 @@ def run_analysis(cfg: Config) -> None:
         # Apply hedge contemporaneously: r'_t = r_LS + h_t * r_IBOV
         pf["LS"] = ls_raw + hedge_ratio * bm_m
 
+    # Regime-aware scaling (optional)
+    regime_result = None
+    regime_cfg = load_regime_scaler_config(cfg.regime_scaler) if getattr(cfg, "regime_scaler", None) else None
+    if regime_cfg is not None:
+        regime_result = compute_regime_scaler(pf, regime_cfg)
+        pf["regime_score"] = regime_result.score
+        pf["regime_scale"] = regime_result.scale
+        for key, series in regime_result.components.items():
+            pf[key] = series.reindex(pf.index)
+        if regime_cfg.apply_to in ("gross", "both"):
+            pf["LS_pre_overlay"] = pf["LS_pre_overlay"].astype(float) * pf["regime_scale"].astype(float)
+        if regime_cfg.apply_to in ("hedge", "both") and "hedge_ratio" in pf.columns:
+            pf["hedge_ratio_unscaled"] = pf["hedge_ratio"]
+            pf["hedge_ratio"] = pf["hedge_ratio"].astype(float) * pf["regime_scale"].astype(float)
+        # Recompute hedged return with updated series
+        bm_series = pf.get("BOVA11", pd.Series(0.0, index=pf.index)).astype(float)
+        if "hedge_ratio" in pf.columns:
+            pf["LS"] = pf["LS_pre_overlay"].astype(float) + pf["hedge_ratio"].astype(float) * bm_series
+        else:
+            pf["LS"] = pf["LS_pre_overlay"].astype(float)
+
     # Vol targeting on hedged series (if requested). Uses rolling vol of hedged LS.
     # We also compute and store an LS_vt comparison series even if not applied to LS.
     ls_for_vt = pf["LS"].astype(float).copy() if "LS" in pf.columns else pd.Series(dtype=float)
@@ -1591,6 +2267,26 @@ def run_analysis(cfg: Config) -> None:
         if getattr(cfg, 'apply_vol_target', False):
             pf["LS_pre_vt"] = ls_for_vt
             pf["LS"] = pf["LS_vt"].astype(float)
+
+    # Financing adjustments: CDI carry on short cash collateral and borrow cost on short book
+    ls_gross_long = pf.get("ls_gross_long", pd.Series(0.0, index=pf.index)).astype(float).fillna(0.0)
+    ls_gross_short = pf.get("ls_gross_short", pd.Series(0.0, index=pf.index)).astype(float).fillna(0.0)
+    if "vt_scale" in pf.columns and getattr(cfg, "apply_vol_target", False):
+        vt_scale_series = pf["vt_scale"].astype(float).fillna(1.0)
+    else:
+        vt_scale_series = pd.Series(1.0, index=pf.index, dtype=float)
+    effective_short = ls_gross_short * vt_scale_series
+    cdi_series = pf.get("CDI", pd.Series(0.0, index=pf.index)).astype(float).fillna(0.0)
+    carry_mult = float(getattr(cfg, "short_cash_carry_multiplier", 1.0))
+    pf["LS_carry"] = carry_mult * effective_short * cdi_series
+    borrow_ann = float(getattr(cfg, "short_borrow_cost_annual", 0.0))
+    borrow_ann = max(borrow_ann, -0.99)  # guard
+    borrow_monthly = np.power(1.0 + borrow_ann, 1.0 / 12.0) - 1.0 if borrow_ann not in (0.0, -0.0) else 0.0
+    pf["LS_borrow_cost"] = effective_short * borrow_monthly
+    pf["LS_financing_net"] = pf["LS_carry"] - pf["LS_borrow_cost"]
+    pf["LS_net"] = pf["LS"].astype(float) + pf["LS_financing_net"]
+    pf["ls_gross_long"] = ls_gross_long
+    pf["ls_gross_short"] = ls_gross_short
 
     # 7) Performance and inference
     print("Computing performance statistics ...")
@@ -1650,6 +2346,23 @@ def run_analysis(cfg: Config) -> None:
             "capm_ir_ann": capm["ir"],
             "capm_te_ann": capm["te_ann"],
         }
+    if "LS_net" in pf.columns:
+        r_lsnet = pf["LS_net"].astype(float)
+        hit_rate = float((r_lsnet > 0).mean())
+        mdd = max_drawdown(r_lsnet)
+        mu, tstat = newey_west_tstat(r_lsnet, lags=cfg.nw_lags)
+        capm = capm_alpha_ir(r_lsnet, pf["BOVA11"], lags=cfg.nw_lags)
+        results["LS_net"] = {
+            "mean_monthly": mu,
+            "tstat_monthly": tstat,
+            "hit_rate": hit_rate,
+            "max_drawdown": mdd,
+            "capm_alpha": capm["alpha"],
+            "capm_alpha_t": capm["alpha_t"],
+            "capm_beta": capm["beta"],
+            "capm_ir_ann": capm["ir"],
+            "capm_te_ann": capm["te_ann"],
+        }
 
     # D10/D1: keep existing excess-to-CDI Sharpe for reference
     for label in ["D10", "D1"]:
@@ -1672,14 +2385,90 @@ def run_analysis(cfg: Config) -> None:
             "max_drawdown": mdd,
         }
 
-    # Alpha/IR for LS vs benchmark as primary yardstick
-    alpha_stats = capm_alpha_ir(pf["LS"], pf["BOVA11"], lags=cfg.nw_lags) if "LS" in pf.columns else {"alpha": np.nan, "alpha_t": np.nan, "beta": np.nan, "ir": np.nan}
-    results["LS_alpha_vs_BOVA11"] = {
-        "alpha_bps_per_month": alpha_stats.get("alpha", np.nan) * 1e4,  # bps
-        "alpha_tstat": alpha_stats.get("alpha_t", np.nan),
-        "beta": alpha_stats.get("beta", np.nan),
-        "ir_ann": alpha_stats.get("ir", np.nan),
+    results["dispersion_gate"] = {
+        "mode": cfg.dispersion_gate or "none",
+        "blocked_months": int(sum(1 for g in gate_flags if g == 0)),
+        "total_months": len(gate_flags),
     }
+    if regime_result is not None and regime_cfg is not None:
+        scale_series = pf.get("regime_scale", pd.Series(dtype=float)).astype(float)
+        results["regime_scaler"] = {
+            "mode": regime_cfg.apply_to,
+            "avg_scale": float(scale_series.mean()) if not scale_series.empty else float("nan"),
+            "min_scale": float(scale_series.min()) if not scale_series.empty else float("nan"),
+            "max_scale": float(scale_series.max()) if not scale_series.empty else float("nan"),
+            "weights": {
+                "dispersion": regime_cfg.weight_dispersion,
+                "vol": regime_cfg.weight_vol,
+                "macro": regime_cfg.weight_macro,
+            },
+        }
+
+    if {
+        "risk_ls_weighted_multiplier",
+        "risk_ls_weighted_score",
+        "risk_ls_flagged",
+        "risk_ls_high",
+        "risk_universe_flagged",
+        "risk_universe_high",
+        "risk_universe_avg_multiplier",
+    }.issubset(pf.columns):
+        results["delisting_risk"] = {
+            "avg_ls_weighted_multiplier": float(pf["risk_ls_weighted_multiplier"].mean()),
+            "avg_ls_weighted_score": float(pf["risk_ls_weighted_score"].mean()),
+            "avg_ls_flagged": float(pf["risk_ls_flagged"].mean()),
+            "avg_ls_high": float(pf["risk_ls_high"].mean()),
+            "avg_universe_flagged": float(pf["risk_universe_flagged"].mean()),
+            "avg_universe_high": float(pf["risk_universe_high"].mean()),
+            "avg_universe_multiplier": float(pf["risk_universe_avg_multiplier"].mean()),
+        }
+
+    risk_summary: Dict[str, float] = {}
+    alerts: List[str] = []
+    if "LS" in pf.columns:
+        ls_series = pf["LS"].astype(float)
+        risk_summary["max_drawdown_full"] = float(max_drawdown(ls_series))
+        if len(ls_series) >= 12:
+            recent_12 = ls_series.iloc[-12:]
+            risk_summary["max_drawdown_12m"] = float(max_drawdown(recent_12))
+            if risk_summary["max_drawdown_12m"] <= -0.08:
+                alerts.append(f"12m max drawdown {risk_summary['max_drawdown_12m']:.2%} exceeds 8% limit")
+        if len(ls_series) >= 24:
+            recent_24 = ls_series.iloc[-24:]
+            risk_summary["max_drawdown_24m"] = float(max_drawdown(recent_24))
+        risk_summary["worst_month"] = float(ls_series.min())
+        if risk_summary["worst_month"] <= -0.06:
+            alerts.append(f"Worst monthly LS return {risk_summary['worst_month']:.2%} worse than -6%")
+    if "risk_ls_weighted_multiplier" in pf.columns:
+        risk_summary["avg_ls_multiplier"] = float(pf["risk_ls_weighted_multiplier"].mean())
+        risk_summary["avg_ls_score"] = float(pf["risk_ls_weighted_score"].mean())
+        latest = pf.iloc[-1]
+        risk_summary["last_ls_multiplier"] = float(latest.get("risk_ls_weighted_multiplier", np.nan))
+        risk_summary["last_ls_flagged"] = float(latest.get("risk_ls_flagged", np.nan))
+        risk_summary["last_ls_high"] = float(latest.get("risk_ls_high", np.nan))
+        if np.isfinite(risk_summary.get("last_ls_multiplier", np.nan)) and risk_summary["last_ls_multiplier"] <= 0.6:
+            alerts.append(f"Latest LS risk multiplier {risk_summary['last_ls_multiplier']:.2f} below 0.60")
+        if np.isfinite(risk_summary.get("last_ls_high", np.nan)) and risk_summary["last_ls_high"] >= 5:
+            alerts.append(f"{int(risk_summary['last_ls_high'])} LS names flagged high risk this month")
+
+    if risk_summary:
+        risk_summary_path = os.path.join(out_dir, "momentum_br_risk_summary.json")
+        with open(risk_summary_path, "w", encoding="utf-8") as fh:
+            json.dump({k: float(v) for k, v in risk_summary.items()}, fh, indent=2)
+    if alerts:
+        print("\n=== Risk Alerts (Momentum) ===")
+        for line in alerts:
+            print(f"- {line}")
+
+    # Alpha/IR for LS vs benchmark as primary yardstick
+    if "LS" in pf.columns:
+        alpha_stats = capm_alpha_ir(pf["LS"], pf["BOVA11"], lags=cfg.nw_lags)
+        results["LS_alpha_vs_BOVA11"] = {
+            "alpha_bps_per_month": alpha_stats.get("alpha", np.nan) * 1e4,  # bps
+            "alpha_tstat": alpha_stats.get("alpha_t", np.nan),
+            "beta": alpha_stats.get("beta", np.nan),
+            "ir_ann": alpha_stats.get("ir", np.nan),
+        }
     # Also report for LS_vt if present
     if "LS_vt" in pf.columns:
         alpha_stats_vt = capm_alpha_ir(pf["LS_vt"], pf["BOVA11"], lags=cfg.nw_lags)
@@ -1697,6 +2486,23 @@ def run_analysis(cfg: Config) -> None:
             "beta": alpha_stats_pre.get("beta", np.nan),
             "ir_ann": alpha_stats_pre.get("ir", np.nan),
         }
+    if "LS_net" in pf.columns:
+        alpha_stats_net = capm_alpha_ir(pf["LS_net"], pf["BOVA11"], lags=cfg.nw_lags)
+        results["LS_net_alpha_vs_BOVA11"] = {
+            "alpha_bps_per_month": alpha_stats_net.get("alpha", np.nan) * 1e4,
+            "alpha_tstat": alpha_stats_net.get("alpha_t", np.nan),
+            "beta": alpha_stats_net.get("beta", np.nan),
+            "ir_ann": alpha_stats_net.get("ir", np.nan),
+        }
+
+    results["LS_financing_assumptions"] = {
+        "avg_short_gross": float(ls_gross_short.mean()) if "ls_gross_short" in pf else np.nan,
+        "avg_long_gross": float(ls_gross_long.mean()) if "ls_gross_long" in pf else np.nan,
+        "avg_carry": float(pf["LS_carry"].mean()) if "LS_carry" in pf else np.nan,
+        "avg_borrow_cost": float(pf["LS_borrow_cost"].mean()) if "LS_borrow_cost" in pf else np.nan,
+        "carry_multiplier": float(getattr(cfg, "short_cash_carry_multiplier", 1.0)),
+        "borrow_cost_annual": float(getattr(cfg, "short_borrow_cost_annual", 0.0)),
+    }
 
     # Stability by subperiods
     def subperiod_mask(start: str, end: str) -> pd.Series:
@@ -1726,16 +2532,17 @@ def run_analysis(cfg: Config) -> None:
     avg_to_d10 = float(pf["turnover_D10"].mean()) if "turnover_D10" in pf else np.nan
     avg_to_ls = float(pf["turnover_LS"].mean()) if "turnover_LS" in pf else np.nan
 
-    # For vol targeting: compute rolling 36-month realized vol of gross LS
-    ls_gross = pf["LS"].astype(float)
-    ls_roll_vol_ann = ls_gross.rolling(window=36, min_periods=12).std() * np.sqrt(12.0)
+    # Select base LS series (net after financing if available) for cost grid
+    ls_base_series = pf["LS_net"].astype(float) if "LS_net" in pf.columns else pf["LS"].astype(float)
+    # For vol targeting: compute rolling 36-month realized vol of base LS
+    ls_roll_vol_ann = ls_base_series.rolling(window=36, min_periods=12).std() * np.sqrt(12.0)
     target_ann_vol = 0.10
 
     for bps in cost_bps_grid:
         per_side_rate = (bps / 10000.0) / 2.0  # half per side
         # net returns = gross - cost_rate * turnover
         d10_net = pf["D10"].astype(float) - per_side_rate * pf["turnover_D10"].astype(float)
-        ls_net = pf["LS"].astype(float) - per_side_rate * pf["turnover_LS"].astype(float)
+        ls_net = ls_base_series - per_side_rate * pf["turnover_LS"].astype(float)
         # Sharpe vs CDI (excess)
         d10_ex = d10_net - pf["CDI"].astype(float)
         ls_ex = ls_net - pf["CDI"].astype(float)
@@ -1789,7 +2596,7 @@ def run_analysis(cfg: Config) -> None:
     # Subperiod alpha significance for LS at 50 bps
     if not kill_triggered and ls_50 is not None:
         per_side_rate = (50 / 10000.0) / 2.0
-        ls_net = pf["LS"].astype(float) - per_side_rate * pf["turnover_LS"].astype(float)
+        ls_net = ls_base_series - per_side_rate * pf["turnover_LS"].astype(float)
         subperiods = {
             "2011-01-01_to_2018-12-31": ("2011-01-01", "2018-12-31"),
             "2019-01-01_to_2025-12-31": ("2019-01-01", "2025-12-31"),
@@ -1815,6 +2622,14 @@ def run_analysis(cfg: Config) -> None:
         print(f"  Alpha IR (annualized): {v['capm_ir_ann']:.2f} (TE={v['capm_te_ann']:.2%} ann)")
         print(f"  Hit rate: {v['hit_rate']:.2%}")
         print(f"  Max DD: {v['max_drawdown']:.2%}")
+    if "LS_net" in results:
+        v = results["LS_net"]
+        print("\nLS (Net after financing):")
+        print(f"  Mean monthly: {v['mean_monthly']:.5f} (t={v['tstat_monthly']:.2f})")
+        print(f"  CAPM alpha vs IBOV: {v['capm_alpha']*1e4:.2f} bps/mo (t={v['capm_alpha_t']:.2f}), Beta={v['capm_beta']:.3f}")
+        print(f"  Alpha IR (annualized): {v['capm_ir_ann']:.2f} (TE={v['capm_te_ann']:.2%} ann)")
+        print(f"  Hit rate: {v['hit_rate']:.2%}")
+        print(f"  Max DD: {v['max_drawdown']:.2%}")
 
     # LS_vt block (comparison)
     if "LS_vt" in results:
@@ -1833,6 +2648,12 @@ def run_analysis(cfg: Config) -> None:
         print(f"  Alpha IR (annualized): {v['capm_ir_ann']:.2f} (TE={v['capm_te_ann']:.2%} ann)")
         print(f"  Hit rate: {v['hit_rate']:.2%}")
         print(f"  Max DD: {v['max_drawdown']:.2%}")
+    fin = results.get("LS_financing_assumptions", {})
+    if fin:
+        print("\nFinancing (averages):")
+        print(f"  Short gross: {fin.get('avg_short_gross', float('nan')):.3f}, Long gross: {fin.get('avg_long_gross', float('nan')):.3f}")
+        print(f"  CDI carry contrib: {fin.get('avg_carry', float('nan')):.5f} | Borrow cost drag: {fin.get('avg_borrow_cost', float('nan')):.5f}")
+        print(f"  Carry multiplier: {fin.get('carry_multiplier', float('nan')):.2f}, Borrow cost (annual): {fin.get('borrow_cost_annual', float('nan')):.2%}")
 
     # D10/D1 blocks (keep CDI-excess context for reference)
     for k in ["D10", "D1"]:
@@ -1953,6 +2774,15 @@ def make_parser() -> argparse.ArgumentParser:
                    help="Rolling window in months for realized vol estimate (e.g., 36)")
     p.add_argument("--vol-min-months", type=int, default=12,
                    help="Minimum months required for realized vol estimate (default 12)")
+    p.add_argument("--short-cash-carry-multiplier", type=float, default=1.0,
+                   help="Multiplier applied to CDI carry on short cash collateral (default: %(default)s)")
+    p.add_argument("--short-borrow-annual", type=float, default=0.08,
+                   help="Annualized borrow cost applied to the short book (e.g., 0.08 = 8%%)")
+    p.add_argument("--dispersion-gate", type=str, default="none",
+                   choices=["none", "quantile50", "quantile60", "quantile70", "quantile80", "quantile90"],
+                   help="Optional dispersion gate: only rebalance when sector dispersion meets or exceeds the selected quantile")
+    p.add_argument("--dispersion-gate-window", type=int, default=None,
+                   help="If set, compute the dispersion quantile using only the most recent N months of history")
     p.add_argument("--band-keep", type=float, default=0.81393,
                    help="Keep band percentile threshold (e.g., 0.80)")
     p.add_argument("--band-add", type=float, default=0.90307,
@@ -2004,6 +2834,8 @@ def make_parser() -> argparse.ArgumentParser:
                    help="Ramp fraction (0..1) for cold start sizing; default = 1 / cohorts if not set")
     p.add_argument("--out-dir", default="results",
                    help="Directory to write results outputs (default: %(default)s)")
+    p.add_argument("--regime-scaler", type=str, default=None,
+                   help="Enable regime-aware sizing (pass 'default' for built-in parameters or a JSON config path).")
     return p
 
 
@@ -2034,7 +2866,7 @@ def config_from_args(args: argparse.Namespace, *, start_date: Optional[str] = No
         gross_tol=args.gross_tol,
         exit_cap_frac=args.exit_cap_frac,
         ls_turnover_budget=args.ls_turnover_budget,
-        use_turnover_budget=getattr(args, "use_turnover_budget", False),
+        use_turnover_budget=getattr(args, "use_turnover_budget", True),
         adaptive_exit_cap=getattr(args, "adaptive_exit_cap", True),
         live_capital=args.live_capital,
         lot_size=args.lot_size,
@@ -2044,6 +2876,11 @@ def config_from_args(args: argparse.Namespace, *, start_date: Optional[str] = No
         out_dir=out_dir if out_dir is not None else getattr(args, "out_dir", "results"),
         kill_alpha_t_min=args.kill_alpha_t_min,
         kill_net_sharpe_min=args.kill_net_sharpe_min,
+        short_cash_carry_multiplier=getattr(args, "short_cash_carry_multiplier", 1.0),
+        short_borrow_cost_annual=getattr(args, "short_borrow_annual", 0.08),
+        dispersion_gate=None if getattr(args, "dispersion_gate", "none") == "none" else getattr(args, "dispersion_gate"),
+        dispersion_gate_window=getattr(args, "dispersion_gate_window", None),
+        regime_scaler=getattr(args, "regime_scaler", None),
     )
 
 

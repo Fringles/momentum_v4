@@ -1,0 +1,5 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2021-08-31,2021-09-01,CXSE3,1,0.75,liquidity_slump,21,0,20930591.0,42479764.0,0
+2021-08-31,2021-09-01,PORT3,1,0.75,liquidity_slump,21,0,1376553.0,2067710.0,0
+2021-08-31,2021-09-01,SHOW3,1,0.75,liquidity_slump,21,0,3215727.0,7187618.0,0
+2021-08-31,2021-09-01,TOKY3,1,0.75,liquidity_slump,21,0,1252247.0,2087823.0,0

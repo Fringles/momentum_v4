@@ -1,0 +1,4 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2014-01-31,2014-02-03,CVCB3,1,0.75,liquidity_slump,21,0,1710443.0,4124752.0,0
+2014-01-31,2014-02-03,KEPL3,1,0.75,liquidity_slump,21,0,1119246.0,2261686.0,0
+2014-01-31,2014-02-03,TUPY3,1,0.75,liquidity_slump,21,0,996566.0,3411819.0,0

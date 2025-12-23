@@ -1,0 +1,8 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2024-10-31,2024-11-01,AERI3,1,0.75,liquidity_slump,21,0,971755.0,2065652.0,0
+2024-10-31,2024-11-01,AMER3,1,0.75,liquidity_slump,21,0,6577016.0,15801282.0,0
+2024-10-31,2024-11-01,DESK3,1,0.75,liquidity_slump,21,0,1436201.0,2535900.0,0
+2024-10-31,2024-11-01,MTRE3,1,0.75,liquidity_slump,21,0,1474816.0,2345439.0,0
+2024-10-31,2024-11-01,OIBR3,1,0.75,liquidity_slump,21,0,1422206.0,2501277.0,0
+2024-10-31,2024-11-01,ONCO3,1,0.75,liquidity_slump,21,0,7856009.0,18716589.0,0
+2024-10-31,2024-11-01,WIZC3,1,0.75,liquidity_slump,21,0,1473073.0,2128759.0,0

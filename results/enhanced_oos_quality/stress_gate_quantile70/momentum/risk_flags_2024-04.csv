@@ -1,0 +1,4 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2024-04-30,2024-05-02,BMGB4,1,0.75,liquidity_slump,21,0,1290857.0,2108577.0,0
+2024-04-30,2024-05-02,GFSA3,1,0.75,liquidity_slump,21,0,8763665.0,29370824.0,0
+2024-04-30,2024-05-02,OIBR3,1,0.75,liquidity_slump,21,0,4710968.0,10170272.0,0

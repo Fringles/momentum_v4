@@ -1,0 +1,2 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2010-12-30,2011-01-03,FFTL4,1,0.75,liquidity_slump,21,0,2739539.0,6115951.0,0

@@ -1,0 +1,3 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2020-03-31,2020-04-01,RCSL4,1,0.75,liquidity_slump,21,0,1035915.0,3155984.0,0
+2020-03-31,2020-04-01,VSTE3,1,0.75,liquidity_slump,21,0,996125.0,2032840.0,0

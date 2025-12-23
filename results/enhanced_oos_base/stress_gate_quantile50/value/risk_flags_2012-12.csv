@@ -1,0 +1,2 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2012-12-28,2013-01-02,AMIL3,1,0.75,liquidity_slump,21,0,8704336.0,22073198.0,0

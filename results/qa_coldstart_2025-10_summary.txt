@@ -1,0 +1,39 @@
+Cold start capital: 750,000.00
+Ramp fraction (inferred): 0.3302
+D10 notional (sum): 247,622.09
+LS notional (sum): -160.56
+Overlay combo_hedge_ratio: 0.170071
+BOVA11 px_ref_open(2025-11-03): 100.0000
+Overlay shares: 421  Notional: 42,100.00
+
+Top 10 by abs notional:
+     CEAB3  D10  L       752      12490.72
+    AURA33  D10  L       182      10639.72
+     WIZC3  D10  L      1198      10183.00
+     SYNE3  D10  L      1708       8625.40
+     RANI3  D10  L       955       8289.40
+     PGMN3  D10  L      2104       7995.20
+     MYPK3  D10  L       723       7960.23
+     AURE3   LS  S      -656      -7071.68
+     CSAN3   LS  S     -1162      -7064.96
+     VULC3  D10  L       294       6735.54
+
+Sector exposure (delta_weight sums):
+  D10:
+    Other: +0.0506
+    Electric Power: +0.0450
+    Trade: +0.0434
+    Financial Services: +0.0284
+    Vehicle & Parts: +0.0227
+  LS:
+    Trade: +0.0141
+    Mining: +0.0105
+    Electric Power: +0.0095
+    Basic & Fabricated Metal: +0.0056
+    Financial Services: +0.0030
+
+LS diagnostics:
+  Long legs notional:  117,032.78
+  Short legs notional: -117,193.34
+  Net:                 -160.56
+  Max single LS |notional|: 7,071.68

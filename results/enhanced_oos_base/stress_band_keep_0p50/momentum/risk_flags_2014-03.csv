@@ -1,0 +1,4 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2014-03-31,2014-04-01,DASA3,1,0.75,liquidity_slump,21,0,3059593.0,10211326.0,0
+2014-03-31,2014-04-01,OGXP3,1,0.75,liquidity_slump,21,0,2694768.0,9857635.0,0
+2014-03-31,2014-04-01,PRIO3,1,0.75,liquidity_slump,21,0,2464741.0,5970814.0,0

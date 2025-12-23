@@ -1,0 +1,383 @@
+{
+  "month_end": "2013-02-28",
+  "trade_date": "2013-03-01",
+  "cohort_id": 0,
+  "weights_ls": {
+    "B3SA3": 0.03333333333333333,
+    "BBDC4": 0.03333333333333333,
+    "BEEF3": 0.03333333333333333,
+    "EQTL3": 0.03333333333333333,
+    "GRND3": 0.03333333333333333,
+    "HBOR3": 0.03333333333333333,
+    "JHSF3": 0.03333333333333333,
+    "TAEE11": 0.03333333333333333,
+    "VLID3": 0.03333333333333333,
+    "YDUQ3": 0.03333333333333333,
+    "AMIL3": 0.03333333333333333,
+    "EZTC3": 0.03333333333333333,
+    "IMCH3": 0.03333333333333333,
+    "LEVE3": 0.03333333333333333,
+    "MPLU3": 0.03333333333333333,
+    "BRAP4": -0.03846153846153847,
+    "CSNA3": -0.03846153846153847,
+    "DASA3": -0.03846153846153847,
+    "ELET3": -0.03846153846153847,
+    "GOLL54": -0.03846153846153847,
+    "JBSS3": -0.03846153846153847,
+    "MGLU3": -0.03846153846153847,
+    "OGXP3": -0.03846153846153847,
+    "OSXB3": -0.03846153846153847,
+    "PDGR3": -0.03846153846153847,
+    "PRML3": -0.03846153846153847,
+    "RSID3": -0.03846153846153847,
+    "VSTE3": -0.03846153846153847
+  },
+  "weights_d10": {
+    "AMIL3": 0.050847457627118654,
+    "B3SA3": 0.06779661016949154,
+    "BBDC4": 0.06779661016949154,
+    "BEEF3": 0.06779661016949154,
+    "EQTL3": 0.06779661016949154,
+    "EZTC3": 0.06779661016949154,
+    "GRND3": 0.06779661016949154,
+    "HBOR3": 0.06779661016949154,
+    "IMCH3": 0.06779661016949154,
+    "JHSF3": 0.06779661016949154,
+    "LEVE3": 0.06779661016949154,
+    "MPLU3": 0.06779661016949154,
+    "TAEE11": 0.06779661016949154,
+    "VLID3": 0.06779661016949154,
+    "YDUQ3": 0.06779661016949154
+  },
+  "dur_long": {
+    "AMIL3": 2,
+    "HBOR3": 8,
+    "IMCH3": 2,
+    "BEEF3": 5,
+    "JHSF3": 5,
+    "TAEE11": 5,
+    "LEVE3": 8,
+    "BBDC4": 2,
+    "VLID3": 8,
+    "MPLU3": 2,
+    "EQTL3": 2,
+    "B3SA3": 2,
+    "GRND3": 5,
+    "YDUQ3": 2,
+    "EZTC3": 26
+  },
+  "dur_short": {
+    "GOLL54": 23,
+    "MGLU3": 2,
+    "DASA3": 8,
+    "PDGR3": 5,
+    "CSNA3": 2,
+    "VSTE3": 5,
+    "JBSS3": 2,
+    "BRAP4": 5,
+    "OSXB3": 23,
+    "PRML3": 8,
+    "OGXP3": 2,
+    "ELET3": 26,
+    "RSID3": 2
+  },
+  "strikes_long": {
+    "LPSB3": 1,
+    "POMO4": 1,
+    "SBSP3": 1,
+    "AMIL3": 1
+  },
+  "strikes_short": {
+    "PETR4": 1,
+    "SANB11": 2,
+    "OGXP3": 1,
+    "RAPT4": 2,
+    "PRIO3": 1
+  },
+  "ls_target_counts": {
+    "long": 0,
+    "short": 0
+  },
+  "delist_risk": {
+    "GOLL54": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 25173086.0,
+      "long_median_volume": 21696093.0,
+      "zero_volume_days": 0
+    },
+    "PDGR3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 72325409.0,
+      "long_median_volume": 81383722.0,
+      "zero_volume_days": 0
+    },
+    "JHSF3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 3945893.0,
+      "long_median_volume": 3874654.0,
+      "zero_volume_days": 0
+    },
+    "BBDC4": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 259623715.0,
+      "long_median_volume": 232346820.0,
+      "zero_volume_days": 0
+    },
+    "PRML3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 15672610.0,
+      "long_median_volume": 14698310.0,
+      "zero_volume_days": 0
+    },
+    "ELET3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 11018131.0,
+      "long_median_volume": 15228573.0,
+      "zero_volume_days": 0
+    },
+    "HBOR3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 3066868.0,
+      "long_median_volume": 3773169.0,
+      "zero_volume_days": 0
+    },
+    "DASA3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 23170198.0,
+      "long_median_volume": 23578659.0,
+      "zero_volume_days": 0
+    },
+    "IMCH3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 12720165.0,
+      "long_median_volume": 8479097.0,
+      "zero_volume_days": 0
+    },
+    "CSNA3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 53277795.0,
+      "long_median_volume": 53894160.0,
+      "zero_volume_days": 0
+    },
+    "BEEF3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 9136908.0,
+      "long_median_volume": 9411230.0,
+      "zero_volume_days": 0
+    },
+    "TAEE11": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 10743075.0,
+      "long_median_volume": 10796838.0,
+      "zero_volume_days": 0
+    },
+    "VSTE3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 7933150.0,
+      "long_median_volume": 6965364.0,
+      "zero_volume_days": 0
+    },
+    "JBSS3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 33165227.0,
+      "long_median_volume": 27313938.0,
+      "zero_volume_days": 0
+    },
+    "OSXB3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 11464049.0,
+      "long_median_volume": 7986799.0,
+      "zero_volume_days": 0
+    },
+    "MPLU3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 22262500.0,
+      "long_median_volume": 18101920.0,
+      "zero_volume_days": 0
+    },
+    "GRND3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 5541840.0,
+      "long_median_volume": 4851043.0,
+      "zero_volume_days": 0
+    },
+    "OGXP3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 241592812.0,
+      "long_median_volume": 179151957.0,
+      "zero_volume_days": 0
+    },
+    "RSID3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 20055004.0,
+      "long_median_volume": 21655476.0,
+      "zero_volume_days": 0
+    },
+    "AMIL3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 6727139.0,
+      "long_median_volume": 6104387.0,
+      "zero_volume_days": 0
+    },
+    "EQTL3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 17473394.0,
+      "long_median_volume": 16052193.0,
+      "zero_volume_days": 0
+    },
+    "YDUQ3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 31517827.0,
+      "long_median_volume": 25561302.0,
+      "zero_volume_days": 0
+    },
+    "EZTC3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 9007608.0,
+      "long_median_volume": 9473481.0,
+      "zero_volume_days": 0
+    },
+    "MGLU3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 7329691.0,
+      "long_median_volume": 5702952.0,
+      "zero_volume_days": 0
+    },
+    "LEVE3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 5861825.0,
+      "long_median_volume": 4941004.0,
+      "zero_volume_days": 0
+    },
+    "VLID3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 10769165.0,
+      "long_median_volume": 10112900.0,
+      "zero_volume_days": 0
+    },
+    "BRAP4": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 39095134.0,
+      "long_median_volume": 33952700.0,
+      "zero_volume_days": 0
+    },
+    "B3SA3": {
+      "score": 0,
+      "flags": [],
+      "multiplier": 1.0,
+      "trading_days": 21,
+      "max_halt_run": 0,
+      "short_median_volume": 148603585.0,
+      "long_median_volume": 131612570.0,
+      "zero_volume_days": 0
+    }
+  }
+}

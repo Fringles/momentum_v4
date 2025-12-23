@@ -1,0 +1,2 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2017-01-31,2017-02-01,CZLT33,1,0.75,liquidity_slump,21,0,1190775.0,2318581.0,0

@@ -1,0 +1,2 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2022-10-31,2022-11-01,ENJU3,1,0.75,liquidity_slump,21,0,1379571.0,2229910.0,0

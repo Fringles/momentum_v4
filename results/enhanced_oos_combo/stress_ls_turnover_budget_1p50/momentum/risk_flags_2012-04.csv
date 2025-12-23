@@ -1,0 +1,4 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2012-04-30,2012-05-02,AMER3,1,0.75,liquidity_slump,21,0,3933543.0,8693683.0,0
+2012-04-30,2012-05-02,CNFB4,1,0.75,liquidity_slump,21,0,1099654.0,2817984.0,0
+2012-04-30,2012-05-02,MILK33,1,0.75,liquidity_slump,21,0,1390581.0,3226516.0,0

@@ -1,0 +1,11 @@
+{
+  "max_drawdown_full": -0.13129336365969035,
+  "max_drawdown_12m": -0.0715652258750421,
+  "max_drawdown_24m": -0.07156522587504222,
+  "worst_month": -0.07156522587504213,
+  "avg_ls_multiplier": 0.9985349290110187,
+  "avg_ls_score": 0.005860283955924651,
+  "last_ls_multiplier": 1.0,
+  "last_ls_flagged": 0.0,
+  "last_ls_high": 0.0
+}

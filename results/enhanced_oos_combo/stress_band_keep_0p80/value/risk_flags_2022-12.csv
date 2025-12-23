@@ -1,0 +1,4 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2022-12-29,2023-01-02,INEP3,1,0.75,liquidity_slump,20,1,1698423.0,4513726.0,1
+2022-12-29,2023-01-02,OIBR3,1,0.75,liquidity_slump,21,0,10774639.0,22235210.0,0
+2022-12-29,2023-01-02,PLPL3,1,0.75,liquidity_slump,21,0,1006804.0,2222529.0,0

@@ -17,7 +17,7 @@
   3️⃣ Next Trading Day (T+1) - Execute at Market Open
   - Use results/orders_YYYY-MM.csv to execute trades
   - Place all orders at market open prices
-  - Apply beta hedge if needed (check hedge_ratio in timeseries)
+  - Size the BOVA11 overlay with `combo_hedge_ratio` from results/combined_timeseries.csv (or the scenario-specific combined file)
 
   4️⃣ After Execution - Same Day
   - Document executed prices and fills
@@ -37,6 +37,9 @@
   - The strategy holds positions until next month-end
   - Cohorts automatically handle exits based on their schedule
   - No manual intervention required
+
+  ⚙️ Optional Overlays
+  - Pass `--regime-scaler default` to `momentum_br.py` / `value_br.py` to enable the regime-aware hedge scaler. It tilts the overlay when dispersion collapses or vol spikes while leaving rankings untouched. Omit the flag to retain current behaviour.
 
   🔄 Next Month-End - Repeat
   - Update database with latest prices

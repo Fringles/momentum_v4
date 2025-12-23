@@ -1,0 +1,9 @@
+{
+  "reason": "aggressive_macro_regime_scaler_underperformed",
+  "metrics": {
+    "regime_full_sharpe": 0.5428549056702044,
+    "baseline_full_sharpe": 0.5657495362516091,
+    "regime_full_max_dd": -0.05490867524820142,
+    "baseline_full_max_dd": -0.04960823130798753
+  }
+}

@@ -1,0 +1,2 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2019-01-31,2019-02-01,PDGR3,1,0.75,liquidity_slump,21,0,2291396.0,4855290.0,0

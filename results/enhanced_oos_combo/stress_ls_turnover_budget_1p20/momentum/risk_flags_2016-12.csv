@@ -1,0 +1,4 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2016-12-29,2017-01-02,DXCO3,1,0.75,liquidity_slump,21,0,6484676.0,13046653.0,0
+2016-12-29,2017-01-02,MILS3,1,0.75,liquidity_slump,21,0,1482521.0,2025419.0,0
+2016-12-29,2017-01-02,WIZC3,1,0.75,liquidity_slump,21,0,1443809.0,2173542.0,0

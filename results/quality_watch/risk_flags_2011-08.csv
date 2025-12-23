@@ -1,0 +1,4 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2011-08-31,2011-09-01,AGEN33,1,0.75,liquidity_slump,21,0,2280328.0,5714566.0,0
+2011-08-31,2011-09-01,IGBR3,1,0.75,liquidity_slump,21,0,1343705.0,3279654.0,0
+2011-08-31,2011-09-01,MNDL3,1,0.75,liquidity_slump,21,0,610288.0,2480534.0,0

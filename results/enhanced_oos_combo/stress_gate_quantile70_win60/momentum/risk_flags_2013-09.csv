@@ -1,0 +1,2 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2013-09-30,2013-10-01,ARTR3,1,0.75,liquidity_slump,21,0,8918904.0,41522211.0,0

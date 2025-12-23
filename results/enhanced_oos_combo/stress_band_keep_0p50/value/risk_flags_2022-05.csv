@@ -1,0 +1,4 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2022-05-31,2022-06-01,BRBI11,1,0.75,liquidity_slump,21,0,1423653.0,2168609.0,0
+2022-05-31,2022-06-01,CSED3,1,0.75,liquidity_slump,21,0,1255684.0,2132256.0,0
+2022-05-31,2022-06-01,LPSB3,1,0.75,liquidity_slump,21,0,1627709.0,4064977.0,0

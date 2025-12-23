@@ -1,0 +1,4 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2010-06-30,2010-07-01,AMAR3,1,0.75,liquidity_slump,21,0,1234504.0,2361367.0,0
+2010-06-30,2010-07-01,RDCD3,1,0.75,liquidity_slump,21,0,23615138.0,47887919.0,0
+2010-06-30,2010-07-01,VIVR3,1,0.75,liquidity_slump,21,0,1306250.0,2924215.0,0

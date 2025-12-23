@@ -1,0 +1,2 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2020-09-30,2020-10-01,PRNR3,1,0.75,liquidity_slump,21,0,1435632.0,2518479.0,0

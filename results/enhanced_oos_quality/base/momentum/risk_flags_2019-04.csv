@@ -1,0 +1,4 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2019-04-30,2019-05-02,CGAS5,1,0.75,liquidity_slump,21,0,533804.0,2835584.0,0
+2019-04-30,2019-05-02,LOGN3,1,0.75,liquidity_slump,21,0,1248072.0,2321834.0,0
+2019-04-30,2019-05-02,MILS3,1,0.75,liquidity_slump,21,0,1752890.0,3586791.0,0

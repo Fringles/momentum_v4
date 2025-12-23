@@ -1,0 +1,3 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2024-09-30,2024-10-01,AMBP3,1,0.75,liquidity_slump,21,0,27173912.0,78129786.0,0
+2024-09-30,2024-10-01,IFCM3,1,0.75,liquidity_slump,21,0,1136590.0,2253563.0,0

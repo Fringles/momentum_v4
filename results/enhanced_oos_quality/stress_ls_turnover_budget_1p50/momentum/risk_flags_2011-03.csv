@@ -1,0 +1,5 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2011-03-31,2011-04-01,BPAN4,1,0.75,liquidity_slump,21,0,1213354.0,2589478.0,0
+2011-03-31,2011-04-01,FLRY3,1,0.75,liquidity_slump,21,0,1536206.0,3985229.0,0
+2011-03-31,2011-04-01,RPMG3,1,0.75,liquidity_slump,21,0,1097189.0,2126999.0,0
+2011-03-31,2011-04-01,TELB4,1,0.75,liquidity_slump,21,0,1442647.0,2459454.0,0

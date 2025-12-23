@@ -1,0 +1,4 @@
+month_end,trade_date,ticker,score,multiplier,flags,trading_days,max_halt_run,short_median_volume,long_median_volume,zero_volume_days
+2021-12-30,2022-01-03,ALLD3,1,0.75,liquidity_slump,21,0,2260498.0,5923492.0,0
+2021-12-30,2022-01-03,CRPG5,1,0.75,liquidity_slump,21,0,1027363.0,2100069.0,0
+2021-12-30,2022-01-03,TECN3,1,0.75,liquidity_slump,21,0,3051637.0,7560625.0,0
